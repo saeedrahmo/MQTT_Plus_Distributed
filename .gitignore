@@ -1,0 +1,10 @@
+
+*.class
+
+\.idea/uiDesigner\.xml
+
+\.idea/workspace\.xml
+
+cv2
+
+sys

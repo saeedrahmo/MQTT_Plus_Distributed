@@ -1,0 +1,36 @@
+<component name="libraryTable">
+  <library name="com.hivemq:hivemq-mqtt-client:1.2.1" type="repository">
+    <properties maven-id="com.hivemq:hivemq-mqtt-client:1.2.1" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/hivemq-mqtt-client-1.2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/rxjava-2.2.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/reactive-streams-1.0.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-buffer-4.1.48.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-codec-4.1.48.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-common-4.1.48.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-handler-4.1.48.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-resolver-4.1.48.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-transport-4.1.48.Final.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jctools-core-2.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/annotations-16.0.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dagger-2.27.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javax.inject-1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/hivemq-mqtt-client-1.2.1-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/rxjava-2.2.19-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/reactive-streams-1.0.3-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-buffer-4.1.48.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-codec-4.1.48.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-common-4.1.48.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-handler-4.1.48.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-resolver-4.1.48.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/netty-transport-4.1.48.Final-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jctools-core-2.1.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/annotations-16.0.3-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/dagger-2.27-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/javax.inject-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

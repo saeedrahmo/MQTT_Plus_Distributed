@@ -1,0 +1,49 @@
+[
+  {
+    "hostname": "localhost:1883",
+    "neighbours": [
+      "localhost:1884",
+      "localhost:1885"
+    ]
+  },
+  {
+    "hostname": "localhost:1884",
+    "neighbours": [
+      "localhost:1883",
+      "localhost:1886",
+      "localhost:1888"
+    ]
+  },
+  {
+    "hostname": "localhost:1885",
+    "neighbours": [
+      "localhost:1883",
+      "localhost:1887",
+      "localhost:1889"
+    ]
+  },
+  {
+    "hostname": "localhost:1886",
+    "neighbours": [
+      "localhost:1884"
+    ]
+  },
+  {
+    "hostname": "localhost:1887",
+    "neighbours": [
+      "localhost:1885"
+    ]
+  },
+  {
+    "hostname": "localhost:1888",
+    "neighbours": [
+      "localhost:1884"
+    ]
+  },
+  {
+    "hostname": "localhost:1889",
+    "neighbours": [
+      "localhost:1885"
+    ]
+  }
+]

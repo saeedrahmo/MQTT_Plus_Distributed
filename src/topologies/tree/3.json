@@ -1,0 +1,21 @@
+[
+  {
+    "hostname": "localhost:1883",
+    "neighbours": [
+      "localhost:1884",
+      "localhost:1885"
+    ]
+  },
+  {
+    "hostname": "localhost:1884",
+    "neighbours": [
+      "localhost:1883"
+    ]
+  },
+  {
+    "hostname": "localhost:1885",
+    "neighbours": [
+      "localhost:1883"
+    ]
+  }
+]

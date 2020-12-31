@@ -1,0 +1,13 @@
+[{  "keyword": "$COUNTNTPEOPLE",
+    "desc": "counts people in an image",
+    "returns": "value"
+    },
+    {"keyword": "$COUNTTMALE",
+    "desc": "counts males in an image",
+    "returns": "value"
+    },
+    {
+     "keyword": "$COUNTFEMALE",
+     "desc": "counts females in an image",
+     "returns": "value"
+    }]

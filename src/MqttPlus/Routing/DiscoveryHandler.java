@@ -1,20 +1,22 @@
 package MqttPlus.Routing;
 
-import java.util.HashSet;
-import java.util.Timer;
+import MqttPlus.JavaHTTPServer;
+
+import java.util.*;
 
 public class DiscoveryHandler implements Runnable{
     private static DiscoveryHandler instance = null;
     private final String multicastAddress = "230.0.0.1";
-    private HashSet<String> discoveredAddresses;
+    private HashMap<String, String> discoveredAddresses;
     private DiscoveryReceiver discoveryReceiver;
     private DiscoverySender discoverySender;
     private final Timer endTimer;
-    private final long discoveryDuration = 40000; //duration of the discovery protocol in ms
+    private final long discoveryDuration = 10000; //duration of the discovery protocol in ms
     private long startingTime;
+    private final String selfAddress = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT;
 
     private DiscoveryHandler(){
-        discoveredAddresses = new HashSet<>();
+        discoveredAddresses = new HashMap<>();
         discoverySender = new DiscoverySender(multicastAddress);
         discoveryReceiver = new DiscoveryReceiver(multicastAddress);
         endTimer = new Timer();
@@ -27,17 +29,17 @@ public class DiscoveryHandler implements Runnable{
         return instance;
     }
 
-    public synchronized HashSet<String> getDiscoveredAddresses(){
-        return discoveredAddresses;
+
+    public synchronized void insertDiscoveredAddress(String proxyAddress, String brokerAddress){
+        discoveredAddresses.put(proxyAddress, brokerAddress);
     }
 
-    public synchronized void insertDiscoveredAddress(String host){
-        discoveredAddresses.add(host);
+    public synchronized boolean isProxyDiscovered(String proxyAddress){
+        return discoveredAddresses.containsKey(proxyAddress) || proxyAddress.equals(selfAddress);
     }
 
     @Override
-    public synchronized void run(){
-        DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver);
+    public void run(){
         try {
             discoverySender.start();
             discoveryReceiver.start();
@@ -47,6 +49,7 @@ public class DiscoveryHandler implements Runnable{
             discoverySender.start();
             discoveryReceiver.start();
         }
+        DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
         endTimer.schedule(stopper, discoveryDuration);
         try {
             discoverySender.join();

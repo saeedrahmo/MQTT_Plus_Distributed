@@ -43,16 +43,31 @@ public class DiscoveryPacketHandler implements Runnable{
     @Override
     public void run() {
         String packetContent = new String(packet.getData(), 0, packet.getLength());
-        String header = packetContent.split("\\n")[0];
+        String header = decodeHeader(packetContent);
         if(checkHeader(header)==1){
             //TODO insert a table with the RTT
             long RTT = DiscoveryHandler.getInstance().getStartingTime() - System.nanoTime();
         }else if(checkHeader(header) == 0){
-            DiscoveryHandler.getInstance().insertDiscoveredAddress(packetContent.split("\\n")[1]);
-            sendRTTComputationMessage(packet);
+            if(!DiscoveryHandler.getInstance().isProxyDiscovered(decodeProxyAddress(packetContent))){
+                System.out.println(packetContent);
+                DiscoveryHandler.getInstance().insertDiscoveredAddress(decodeProxyAddress(packetContent), decodeBrokerAddress(packetContent));
+            }
+            //sendRTTComputationMessage(packet);
         }
 
 
+    }
+
+    private String decodeProxyAddress(String packet){
+        return packet.split("\\n")[2].split(" ")[2];
+    }
+
+    private String decodeBrokerAddress(String packet){
+        return packet.split("\\n")[1].split(" ")[2];
+    }
+
+    private String decodeHeader(String packet){
+        return packet.split("\\n")[0];
     }
 
 

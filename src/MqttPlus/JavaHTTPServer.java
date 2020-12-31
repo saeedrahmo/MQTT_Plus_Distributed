@@ -51,7 +51,7 @@ public class JavaHTTPServer implements Runnable{
 
     private static int count = 0;
     // port to listen connection
-    static int PORT;
+    public static int PORT;
 
     // verbose mode
     static final boolean verbose = true;
@@ -84,7 +84,7 @@ public class JavaHTTPServer implements Runnable{
             if(distributedProtocol){
 
                 //hardcodeORT();
-                //new Thread(DiscoveryHandler.getInstance()).start();
+                new Thread(DiscoveryHandler.getInstance()).start();
                 new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
             }
             ServerSocket serverConnect = new ServerSocket(PORT);

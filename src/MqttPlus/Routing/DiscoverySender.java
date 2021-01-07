@@ -8,12 +8,11 @@ import java.util.concurrent.TimeUnit;
 
 public class DiscoverySender extends Thread {
 
-    private final String multicastAddress;
     private final int port = 4446;
     private boolean isRunning;
+    private final String multicastAddress = "230.0.0.1";
 
-    public DiscoverySender(String multicastAddress){
-        this.multicastAddress = multicastAddress;
+    public DiscoverySender(){
         this.isRunning = true;
     }
 
@@ -27,14 +26,14 @@ public class DiscoverySender extends Thread {
             String header = "MQTT+ Distributed Discovery Message";
             String payloadLineOne = "Broker Address: " + AdvertisementHandling.myHostname(JavaHTTPServer.local);
             String payloadLineTwo = "Proxy Address: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT;
-            buf = String.join("\n", header, payloadLineOne, payloadLineTwo).getBytes();
+            String payloadLineThree = "RTT listening on: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + DiscoveryHandler.getInstance().getRTTPort();
+            buf = String.join("\n", header, payloadLineOne, payloadLineTwo, payloadLineThree).getBytes();
 
             DatagramPacket packet = new DatagramPacket(buf, buf.length, group, port);
             while(getIsRunning()) {
                 socket.send(packet);
                 TimeUnit.SECONDS.sleep(3);
             }
-
 
             socket.close();
 
@@ -48,8 +47,8 @@ public class DiscoverySender extends Thread {
 
     }
 
-    public synchronized void setIsRunning(boolean value){
-        isRunning = value;
+    public synchronized void finish(){
+        isRunning = false;
     }
 
     public synchronized boolean getIsRunning(){

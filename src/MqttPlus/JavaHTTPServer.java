@@ -85,7 +85,7 @@ public class JavaHTTPServer implements Runnable{
 
                 //hardcodeORT();
                 new Thread(DiscoveryHandler.getInstance()).start();
-                new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
+                //new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
             }
             ServerSocket serverConnect = new ServerSocket(PORT);
             System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
@@ -99,6 +99,9 @@ public class JavaHTTPServer implements Runnable{
                         ORT.getInstance().disconnectClients();
                         SRT.getInstance().disconnectClients();
                         PRT.getInstance().disconnectClients();
+                        DiscoveryHandler.getInstance().stop();
+                        RTTHandler.getInstance().stop();
+                        DiscoveryHandler.getInstance().stop();
                         MQTTPublish.disconnectClient();
                 }
             });
@@ -188,7 +191,7 @@ public class JavaHTTPServer implements Runnable{
 
         //continue to create thread to handle the clients request but block them until discovery is completed
         if(distributedProtocol) {
-            while (this.getState().equals(ServerState.valueOf("DISCOVERY"))) {
+            while (!this.getState().equals(ServerState.valueOf("NORMAL"))) {
                 /*synchronized (this.discoveryHandler) {
                     try {
                         this.discoveryHandler.wait();
@@ -196,7 +199,7 @@ public class JavaHTTPServer implements Runnable{
                         e.printStackTrace();
                     }
                 }*/
-
+                //TODO write the code to wake up the working threads when all the process is finished
                 synchronized (this.jsonUtility) {
                     try {
                         this.jsonUtility.wait();

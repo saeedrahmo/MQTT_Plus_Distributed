@@ -1,5 +1,7 @@
 package MqttPlus.Routing;
 
+import MqttPlus.JavaHTTPServer;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -17,42 +19,34 @@ public class DiscoveryPacketHandler implements Runnable{
     private int checkHeader(String header){
         if(header.compareTo("MQTT+ Distributed Discovery Message") ==0){
             return 0;
-        }else if(header.compareTo("MQTT+ Distributed RTT computation Message") == 0){
+        }else if(header.contains("MQTT+ Distributed RTT Message")){
             return 1;
         }else{
             return -1;
         }
     }
 
-    private void sendRTTComputationMessage(DatagramPacket packet){
-        try {
-            DatagramSocket socket = new DatagramSocket(4445);
-            InetAddress destinationAddress = packet.getAddress();
-            int destinationPort = packet.getPort();
-            String message = "MQTT+ Distributed RTT computation Message\n";
-            DatagramPacket RTTPacket = new DatagramPacket(message.getBytes(), message.getBytes().length, destinationAddress, destinationPort);
-            socket.send(RTTPacket);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     @Override
     public void run() {
         String packetContent = new String(packet.getData(), 0, packet.getLength());
         String header = decodeHeader(packetContent);
-        if(checkHeader(header)==1){
-            //TODO insert a table with the RTT
-            long RTT = DiscoveryHandler.getInstance().getStartingTime() - System.nanoTime();
-        }else if(checkHeader(header) == 0){
+        if(checkHeader(header) == 0){
             if(!DiscoveryHandler.getInstance().isProxyDiscovered(decodeProxyAddress(packetContent))){
+                if(!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")))){
+                    JavaHTTPServer.setState(ServerState.DISCOVERY);
+                    DiscoveryHandler.getInstance().clearDiscoveredAddresses();
+                    synchronized (DiscoveryHandler.getInstance()){
+                        DiscoveryHandler.getInstance().notify();
+                    }
+                }
                 System.out.println(packetContent);
+                System.out.println(decodeRTTAddress(packetContent));
+                System.out.println(" ");
                 DiscoveryHandler.getInstance().insertDiscoveredAddress(decodeProxyAddress(packetContent), decodeBrokerAddress(packetContent));
+                DiscoveryHandler.getInstance().insertDiscoveredRTTAddress(decodeProxyAddress(packetContent), decodeRTTAddress(packetContent));
+
             }
-            //sendRTTComputationMessage(packet);
         }
 
 
@@ -70,5 +64,8 @@ public class DiscoveryPacketHandler implements Runnable{
         return packet.split("\\n")[0];
     }
 
+    private String decodeRTTAddress(String packet){
+        return packet.split("\\n")[3].split(" ")[3];
+    }
 
 }

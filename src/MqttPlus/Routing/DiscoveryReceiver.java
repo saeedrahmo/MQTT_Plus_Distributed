@@ -1,5 +1,7 @@
 package MqttPlus.Routing;
 
+import MqttPlus.JavaHTTPServer;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -7,22 +9,28 @@ import java.net.MulticastSocket;
 
 public class DiscoveryReceiver extends Thread{
 
-    private String multicastAddress;
     private final int port = 4446;
-    private byte[] buf;
+    private final String multicastAddress = "230.0.0.1";
     private MulticastSocket socket;
     private boolean isRunning;
+    private static DiscoveryReceiver instance = null;
 
-    public DiscoveryReceiver(String multicastAddress)  {
-        this.multicastAddress = multicastAddress;
-        buf = new byte[256];
+
+    private DiscoveryReceiver() {
         this.isRunning = true;
 
         try {
             this.socket = new MulticastSocket(port);
-        }catch (IOException ex){
+        } catch (IOException ex) {
 
         }
+    }
+
+    public static DiscoveryReceiver getInstance(){
+        if(instance == null){
+            instance = new DiscoveryReceiver();
+        }
+        return instance;
     }
 
    /* public String getMulticastAddress(){
@@ -33,12 +41,8 @@ public class DiscoveryReceiver extends Thread{
         return socket;
     }*/
 
-    public synchronized boolean isRunning(){
+    public synchronized boolean getIsRunning(){
         return isRunning;
-    }
-
-    public synchronized void setIsRunning(boolean value){
-        isRunning = value;
     }
 
 
@@ -47,17 +51,22 @@ public class DiscoveryReceiver extends Thread{
         try {
             InetAddress group = InetAddress.getByName(multicastAddress);
             socket.joinGroup(group);
-            while(isRunning()){
+            while(getIsRunning()){
+                byte[] buf = new byte[256];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 new Thread(new DiscoveryPacketHandler(packet)).start();
             }
-            socket.leaveGroup(group);
-            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+
+    public synchronized void finish(){
+        socket.close();
+        isRunning = false;
     }
 }

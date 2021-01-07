@@ -1,7 +1,9 @@
 package MqttPlus.Routing;
 
+import MqttPlus.JavaHTTPServer;
+
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.*;
 import java.util.TimerTask;
 
 public class DiscoveryStopper extends TimerTask {
@@ -18,7 +20,16 @@ public class DiscoveryStopper extends TimerTask {
 
     @Override
     public void run() {
-        receiver.setIsRunning(false);
-        sender.setIsRunning(true);
+        sender.finish();
+        JavaHTTPServer.setState(ServerState.RTT);
+        synchronized (RTTHandler.getInstance()){
+            RTTHandler.getInstance().notifyAll();
+        }
+        if(!RTTHandler.isStarted()){
+            new Thread(RTTHandler.getInstance()).start();
+        }else{
+            RTTHandler.getInstance().restartHandler();
+        }
     }
+
 }

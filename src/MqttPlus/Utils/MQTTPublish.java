@@ -15,9 +15,9 @@ public class MQTTPublish {
     public synchronized static void sendPublish(String topic,Object payload) {
         int qos = 2;
         if(!client.getState().isConnected()){
-            client.toBlocking().connect();
+            client.toAsync().connect();
         }
-        client.toBlocking().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
+        client.toAsync().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
     }
 
     public static void setBrokerPort(String port){

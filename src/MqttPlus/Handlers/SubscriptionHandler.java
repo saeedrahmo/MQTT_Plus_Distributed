@@ -142,10 +142,10 @@ public class SubscriptionHandler {
         String hostname = brokerAddress.split(":")[0];
         String port = brokerAddress.split(":")[1];
         Mqtt3Client client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
-        client.toBlocking().connect();
-        client.toBlocking().subscribeWith().topicFilter(topic + "@" + AdvertisementHandling.myHostname(JavaHTTPServer.local)).qos(MqttQos.AT_LEAST_ONCE).send();
-        client.toBlocking().unsubscribeWith().topicFilter(topic).send();
-        client.toBlocking().disconnect();
+        client.toAsync().connect();
+        client.toAsync().subscribeWith().topicFilter(topic + "@" + AdvertisementHandling.myHostname(JavaHTTPServer.local)).qos(MqttQos.AT_LEAST_ONCE).send();
+        client.toAsync().unsubscribeWith().topicFilter(topic).send();
+        client.toAsync().disconnect();
 
     }
 

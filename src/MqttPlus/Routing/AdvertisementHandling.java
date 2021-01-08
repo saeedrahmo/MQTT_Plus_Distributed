@@ -58,10 +58,10 @@ public class AdvertisementHandling {
         Mqtt3Client client = ORT.getInstance().getClient(broker);
         synchronized (client) {
             if (!client.getState().isConnected()) {
-                    client.toBlocking().connect();
+                    client.toAsync().connect();
             }
         }
-        client.toBlocking().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
+        client.toAsync().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
     }
 
     public static String myHostname(boolean local){

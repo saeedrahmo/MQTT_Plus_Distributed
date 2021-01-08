@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 public class JavaHTTPServer implements Runnable{
@@ -41,7 +42,6 @@ public class JavaHTTPServer implements Runnable{
     private static ServerState state = ServerState.valueOf("DISCOVERY");
     private final DiscoveryHandler discoveryHandler;
     private final JSONUtility jsonUtility; //to be removed
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
 
 
     public static final boolean local = true;
@@ -84,8 +84,8 @@ public class JavaHTTPServer implements Runnable{
             if(distributedProtocol){
 
                 //hardcodeORT();
-                new Thread(DiscoveryHandler.getInstance()).start();
-                //new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
+                //new Thread(DiscoveryHandler.getInstance()).start();
+                new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
             }
             ServerSocket serverConnect = new ServerSocket(PORT);
             System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
@@ -105,11 +105,12 @@ public class JavaHTTPServer implements Runnable{
                         MQTTPublish.disconnectClient();
                 }
             });
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(300);
             while (true) {
 
                 // create dedicated thread to manage the client connection
                 Runnable myServer = new JavaHTTPServer(serverConnect.accept(), JSONUtility.getInstance(topology, numberOfBrokers));
-                executorService.execute(myServer);
+                executor.submit(myServer);
 
                 if (verbose) {
                     System.out.println("Connecton opened. (" + new Date() + ")");

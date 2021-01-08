@@ -45,7 +45,7 @@ public abstract class RoutingTable {
                     id = ("PRT"+ (new Integer(MQTTPublish.getBrokerPort())).toString() + UUID.randomUUID().toString()).substring(0, 18);
                 }
                 client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
-                client.toBlocking().connect();
+                client.toAsync().connect();
                 clients.put(hop, client);
 
             }

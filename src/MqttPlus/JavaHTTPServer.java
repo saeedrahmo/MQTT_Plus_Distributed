@@ -84,8 +84,8 @@ public class JavaHTTPServer implements Runnable{
             if(distributedProtocol){
 
                 //hardcodeORT();
-                //new Thread(DiscoveryHandler.getInstance()).start();
-                new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
+                new Thread(DiscoveryHandler.getInstance()).start();
+                //new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
             }
             ServerSocket serverConnect = new ServerSocket(PORT);
             System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
@@ -105,7 +105,7 @@ public class JavaHTTPServer implements Runnable{
                         MQTTPublish.disconnectClient();
                 }
             });
-            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(300);
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(200);
             while (true) {
 
                 // create dedicated thread to manage the client connection

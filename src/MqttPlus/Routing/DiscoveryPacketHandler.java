@@ -45,6 +45,7 @@ public class DiscoveryPacketHandler implements Runnable{
                 System.out.println(" ");
                 DiscoveryHandler.getInstance().insertDiscoveredAddress(decodeProxyAddress(packetContent), decodeBrokerAddress(packetContent));
                 DiscoveryHandler.getInstance().insertDiscoveredRTTAddress(decodeProxyAddress(packetContent), decodeRTTAddress(packetContent));
+                DiscoveryHandler.getInstance().insertDiscoveredSTPAddress(decodeProxyAddress(packetContent), decodeSTPAddress(packetContent));
 
             }
         }
@@ -66,6 +67,10 @@ public class DiscoveryPacketHandler implements Runnable{
 
     private String decodeRTTAddress(String packet){
         return packet.split("\\n")[3].split(" ")[3];
+    }
+
+    private String decodeSTPAddress(String packet) {
+        return packet.split("\\n")[4].split(" ")[3];
     }
 
 }

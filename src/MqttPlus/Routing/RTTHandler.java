@@ -2,10 +2,7 @@ package MqttPlus.Routing;
 
 import MqttPlus.JavaHTTPServer;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class RTTHandler implements Runnable{
@@ -19,9 +16,15 @@ public class RTTHandler implements Runnable{
     private boolean restart;
     private int port;
     private HashSet<String> requestNumbers;
+    private STPHandler stpHandler;
+    private Thread STPHandlerThread;
+    private ArrayList<String> rttComputedForHosts;
 
     private RTTHandler(){
+        stpHandler = STPHandler.getInstance();
+        STPHandlerThread = new Thread(stpHandler);
         startingTimeTable = new HashMap<>();
+        rttComputedForHosts= new ArrayList<>();
         receiver = RTTMsgReceiver.getInstance();
         receiver.start();
         RTTable = new HashMap<>();
@@ -58,7 +61,7 @@ public class RTTHandler implements Runnable{
                     sender.start();
                 }
             }
-            while((!(getRTTableKeySet().containsAll(getStartingTimeTableKeySet())) && isRunning && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
+            while((!rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && isRunning && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
                 synchronized (this){
                     try {
                         this.wait();
@@ -67,6 +70,16 @@ public class RTTHandler implements Runnable{
                     }
                 }
             }
+            System.out.println("Server State: " + JavaHTTPServer.getState());
+
+            if(rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && !STPHandlerThread.isAlive()){
+                JavaHTTPServer.setState(ServerState.valueOf("STP"));
+                synchronized (STPHandler.getInstance()){
+                    STPHandler.getInstance().notifyAll();
+                }
+                STPHandlerThread.start();
+            }
+            rttComputedForHosts.clear();
 
             try {
 
@@ -99,6 +112,7 @@ public class RTTHandler implements Runnable{
     public synchronized void computeRTT(String host){
         if(!isRestarted()) {
             RTTable.put(host, System.nanoTime() - startingTimeTable.get(host));
+            rttComputedForHosts.add(host);
             startingTimeTable.put(host, new Long(0));
             System.out.println(RTTable);
         }
@@ -114,6 +128,7 @@ public class RTTHandler implements Runnable{
     public synchronized void restartHandler(){
         System.out.println("restartHandler");
         RTTable.clear();
+        rttComputedForHosts.clear();
         startingTimeTable.clear();
         restart = true;
         RTTMsgSender.setRestarted(true);
@@ -146,6 +161,10 @@ public class RTTHandler implements Runnable{
 
     public synchronized boolean containsRequest(String requestNumber){
         return requestNumbers.contains(requestNumber);
+    }
+
+    public synchronized Long getRTT(String host){
+        return RTTable.get(host);
     }
 
 

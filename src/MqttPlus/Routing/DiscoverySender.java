@@ -27,7 +27,8 @@ public class DiscoverySender extends Thread {
             String payloadLineOne = "Broker Address: " + AdvertisementHandling.myHostname(JavaHTTPServer.local);
             String payloadLineTwo = "Proxy Address: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT;
             String payloadLineThree = "RTT listening on: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + DiscoveryHandler.getInstance().getRTTPort();
-            buf = String.join("\n", header, payloadLineOne, payloadLineTwo, payloadLineThree).getBytes();
+            String payloadLineFour = "STP listening on: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + DiscoveryHandler.getInstance().getSTPort();
+            buf = String.join("\n", header, payloadLineOne, payloadLineTwo, payloadLineThree, payloadLineFour).getBytes();
 
             DatagramPacket packet = new DatagramPacket(buf, buf.length, group, port);
             while(getIsRunning()) {

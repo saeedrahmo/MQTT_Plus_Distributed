@@ -16,8 +16,11 @@ public class DiscoveryHandler implements Runnable{
     private final String selfAddress = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT;
     private boolean isRunning;
     private final int RTTPort;
+    private final int STPort;
     private HashMap<String, String> RTTAddressMap;
+    private HashMap<String, String> STPAddressMap;
     private DatagramSocket RTTSocket;
+    private DatagramSocket STPSocket;
     private RTTHandler rttHandler;
 
     private DiscoveryHandler(){
@@ -25,7 +28,9 @@ public class DiscoveryHandler implements Runnable{
         discoverySender = new DiscoverySender();
         discoveryReceiver = DiscoveryReceiver.getInstance();
         RTTPort = chooseRTTPort();
+        STPort = chooseSTPort();
         RTTAddressMap = new HashMap<>();
+        STPAddressMap = new HashMap<>();
         endTimer = new Timer();
         isRunning = true;
     }
@@ -51,6 +56,12 @@ public class DiscoveryHandler implements Runnable{
         System.out.println("RTTAddress Map: " + RTTAddressMap);
     }
 
+    public synchronized void insertDiscoveredSTPAddress(String proxy, String stpAddress){
+        STPAddressMap.put(proxy, stpAddress);
+        System.out.println("STPAddressMap Map: " + STPAddressMap);
+
+    }
+
     public synchronized Set<String> getProxies(){
         return discoveredAddresses.keySet();
     }
@@ -59,11 +70,20 @@ public class DiscoveryHandler implements Runnable{
         return RTTAddressMap.get(proxy);
     }
 
+    public String getSelfAddress() {
+        return selfAddress;
+    }
+
+    public synchronized String getSTPAddress(String proxy){
+        return STPAddressMap.get(proxy);
+    }
+
     @Override
     public void run(){
         discoverySender.start();
         discoveryReceiver.start();
         rttHandler = RTTHandler.getInstance();
+
 
         DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
         endTimer.schedule(stopper, discoveryDuration);
@@ -120,7 +140,7 @@ public class DiscoveryHandler implements Runnable{
         int port = 4447;
 
         do{
-            found = !isPortInUse(port);
+            found = !isPortInUse(port, true);
             if(!found)
                 port++;
         }while(!found);
@@ -128,11 +148,28 @@ public class DiscoveryHandler implements Runnable{
         return port;
     }
 
-    private boolean isPortInUse(int port){
+    private int chooseSTPort(){
+        boolean found = true;
+        int port = 1024;
+
+        do{
+            found = !isPortInUse(port, false);
+            if(!found)
+                port++;
+        }while(!found);
+
+        return port;
+
+    }
+
+    private boolean isPortInUse(int port, boolean isRTT){
         try{
             InetAddress address = InetAddress.getByName(AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0]);
             DatagramSocket socket = new DatagramSocket(port);
-            RTTSocket = socket;
+            if(isRTT)
+                RTTSocket = socket;
+            else
+                STPSocket = socket;
             return false;
         } catch (SocketException e) {
             if(e instanceof BindException)
@@ -148,6 +185,14 @@ public class DiscoveryHandler implements Runnable{
     }
     public int getRTTPort(){
         return RTTPort;
+    }
+
+    public DatagramSocket getSTPSocket(){
+        return STPSocket;
+    }
+
+    public int getSTPort(){
+        return STPort;
     }
 
 

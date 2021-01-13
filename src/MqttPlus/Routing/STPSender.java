@@ -64,7 +64,9 @@ public class STPSender extends Thread{
                 STPHandler.getInstance().insertRootFinishedMessageDestination(dest);
                 if (STPHandler.getInstance().canPassToNormal()) {
                     STPHandler.getInstance().setState(STPState.valueOf("NORMAL"));
-                    STPHandler.getInstance().notifyAll();
+                    synchronized (STPHandler.getInstance()) {
+                        STPHandler.getInstance().notifyAll();
+                    }
                 }
             }
         } catch (SocketException e) {

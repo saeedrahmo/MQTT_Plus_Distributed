@@ -14,6 +14,7 @@ public class RTTHandler implements Runnable{
     private HashMap<String, Long> RTTable;
     private boolean isRunning;
     private boolean restart;
+    private boolean restartSTP;
     private int port;
     private HashSet<String> requestNumbers;
     private STPHandler stpHandler;
@@ -31,6 +32,7 @@ public class RTTHandler implements Runnable{
         requestNumbers = new HashSet<>();
         isRunning = true;
         restart = false;
+        restartSTP = false;
 
     }
 
@@ -78,6 +80,11 @@ public class RTTHandler implements Runnable{
                     STPHandler.getInstance().notifyAll();
                 }
                 STPHandlerThread.start();
+            }
+            if(restartSTP){
+                STPHandler.getInstance().restartProtocol();
+                JavaHTTPServer.setState(ServerState.valueOf("STP"));
+                restartSTP = false;
             }
             rttComputedForHosts.clear();
 
@@ -131,6 +138,7 @@ public class RTTHandler implements Runnable{
         rttComputedForHosts.clear();
         startingTimeTable.clear();
         restart = true;
+        restartSTP = true;
         RTTMsgSender.setRestarted(true);
         this.notify();
 

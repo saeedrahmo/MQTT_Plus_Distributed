@@ -20,7 +20,7 @@ public class STPacketHandler implements Runnable{
     public void run() {
         String packetContent = new String(packet.getData(), packet.getOffset(), packet.getLength());
 
-        while(!JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))){
+        while(!JavaHTTPServer.getState().equals(ServerState.valueOf("STP")) && !STPHandler.getInstance().getRestarted()){
             synchronized (STPHandler.getInstance()){
                 try {
                     STPHandler.getInstance().wait();
@@ -29,6 +29,8 @@ public class STPacketHandler implements Runnable{
                 }
             }
         }
+        if(STPHandler.getInstance().getRestarted())
+            return;
 
         if(decodeHeader(packetContent).equals("MQTT+ STP root selection completed")){
             rootFinishedMessage = true;
@@ -71,7 +73,6 @@ public class STPacketHandler implements Runnable{
                 String source = decodeSource(packetContent);
                 STPHandler.getInstance().insertRootFinishedMessageSource(source);
                 if (STPHandler.getInstance().canPassToNormal()) {
-                    System.out.println("BUG2");
                     STPHandler.getInstance().setState(STPState.valueOf("NORMAL"));
                     STPHandler.getInstance().notifyAll();
                 }

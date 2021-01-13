@@ -80,4 +80,15 @@ public class ORT{
         return clientIDs.contains(id);
     }
 
+    public synchronized void clearTable(){
+        oneHopBrokers.clear();
+        clientIDs.clear();
+        for (Mqtt3Client client: clients.values()){
+            if(client.getState().isConnected()){
+                client.toAsync().disconnect();
+            }
+        }
+        clients.clear();
+    }
+
 }

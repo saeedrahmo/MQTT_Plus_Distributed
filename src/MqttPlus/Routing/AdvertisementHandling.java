@@ -24,11 +24,15 @@ public class AdvertisementHandling {
     private static final HashSet<String> publishedTopics = new HashSet<>();
 
 
-    public static boolean isAlreadyPublished(String topic){
+    public static synchronized void clearTopics(){
+        publishedTopics.clear();
+    }
+
+    public synchronized static boolean isAlreadyPublished(String topic){
         return publishedTopics.contains(topic);
     }
 
-    public static void addTopic(String topic){
+    public synchronized static void addTopic(String topic){
         publishedTopics.add(topic);
     }
 

@@ -34,9 +34,11 @@ public class STPHandler implements Runnable{
     private STPState stpState;
     private final long endDelay = 10000;
     private boolean waitForFinish;
+    private boolean restarted;
 
     private STPHandler(){
         waitForFinish = false;
+        restarted = false;
         pathCost = new Long(0);
         rootRequestSources = new HashSet<>();
         rootFinishedMessageSources = new HashSet<>();
@@ -271,9 +273,7 @@ public class STPHandler implements Runnable{
                 System.out.println("PROXY INSIDE STP HANDLER:" + proxy);
                 new STPSender(proxy, false).start();
             }
-            System.out.println("WAITFORFINISH: " + waitForFinish);
             while(waitForFinish){
-                System.out.println("ciclo waitforfinish");
                 synchronized (STPHandler.getInstance()){
                     try {
                         STPHandler.getInstance().wait();
@@ -283,7 +283,9 @@ public class STPHandler implements Runnable{
                 }
             }
 
-            while(STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) || STPHandler.getInstance().getState().equals(STPState.valueOf("FINISHED"))){
+            //TODO verify the condition below
+
+            while((STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) || STPHandler.getInstance().getState().equals(STPState.valueOf("FINISHED"))) || !JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))){
                 synchronized (STPHandler.getInstance()){
                     try {
                         STPHandler.getInstance().wait();
@@ -292,12 +294,13 @@ public class STPHandler implements Runnable{
                     }
                 }
             }
+
+            System.out.println("Server state inside STP: " + JavaHTTPServer.getState());
+
             if(getState().equals(STPState.valueOf("RESTARTED"))){
-                /*TODO: insert the clear and the recovery of initial state*/
                 setState(STPState.ROOT);
             }
             if(getState().equals(STPState.valueOf("NORMAL"))){
-                System.out.println("prova");
                 waitForFinish = true;
             }
             if(!getState().equals(STPState.valueOf("ROOT"))) {
@@ -340,6 +343,33 @@ public class STPHandler implements Runnable{
 
     public synchronized void cancelTimer(){
         endTimer.cancel();
+    }
+
+    public synchronized void restartProtocol(){
+        root = DiscoveryHandler.getInstance().getSelfAddress();
+        pathCost = new Long(0);
+        rootL = L;
+        rootM = M;
+        rootFinishedMessageDestinations.clear();
+        rootRequestSources.clear();
+        rootFinishedMessageSources.clear();
+        localRootMessageDestinations.clear();
+        children.clear();
+        ORT.getInstance().clearTable();
+        SRT.getInstance().clearTable();
+        PRT.getInstance().clearTable();
+        AdvertisementHandling.clearTopics();
+        setRestarted(false);
+        setState(STPState.valueOf("RESTARTED"));
+        STPHandler.getInstance().notifyAll();
+    }
+
+    public synchronized boolean getRestarted(){
+        return restarted;
+    }
+
+    public synchronized void setRestarted(boolean value){
+        restarted = value;
     }
 }
 

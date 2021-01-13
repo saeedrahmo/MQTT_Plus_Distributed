@@ -100,5 +100,16 @@ public abstract class RoutingTable {
         return clientIDs.contains(id);
     }
 
+    public synchronized void clearTable(){
+        routingTable.clear();
+        clientIDs.clear();
+        for (Mqtt3Client client: clients.values()){
+            if(client.getState().isConnected()){
+                client.toAsync().disconnect();
+            }
+        }
+        clients.clear();
+    }
+
 
 }

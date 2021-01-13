@@ -55,7 +55,6 @@ public class STPacketHandler implements Runnable{
             Double M = new Double(decodeM(packetContent));
             Long pathCost = new Long(decodePathCost(packetContent));
             String source = decodeSource(packetContent);
-            STPHandler.getInstance().insertRootRequestSource(source);
             Double C = STPHandler.getInstance().getAlpha()*L + STPHandler.getInstance().getBeta()*M;
             Double localC = STPHandler.getInstance().getAlpha()*STPHandler.getInstance().getRootL() + STPHandler.getInstance().getBeta()*STPHandler.getInstance().getAlpha()*STPHandler.getInstance().getRootM();
             if(C > localC){
@@ -65,8 +64,11 @@ public class STPacketHandler implements Runnable{
                     setNewRoot(root, M, L);
                 }
             }
-            if(STPHandler.getInstance().isRootFinished()){
-                STPHandler.getInstance().sendFinishRootPhase();
+            synchronized (STPHandler.getInstance()) {
+                STPHandler.getInstance().insertRootRequestSource(source);
+                if (STPHandler.getInstance().isRootFinished()) {
+                    STPHandler.getInstance().sendFinishRootPhase();
+                }
             }
         }else if(STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) && rootFinishedMessage){
             synchronized (STPHandler.getInstance()) {
@@ -87,7 +89,7 @@ public class STPacketHandler implements Runnable{
                         STPHandler.getInstance().setRoot(source);
                         STPHandler.getInstance().setPathCost(pathCost + RTTHandler.getInstance().getRTT(source));
                         for (String proxy : DiscoveryHandler.getInstance().getProxies()) {
-                            new STPSender(DiscoveryHandler.getInstance().getSTPAddress(proxy), false).start();
+                            new STPSender(proxy, false).start();
                         }
                     }
                     if(STPHandler.getInstance().containsChild(source)){

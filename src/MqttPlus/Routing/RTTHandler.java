@@ -74,17 +74,18 @@ public class RTTHandler implements Runnable{
             }
             System.out.println("Server State: " + JavaHTTPServer.getState());
 
-            if(rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && !STPHandlerThread.isAlive()){
-                JavaHTTPServer.setState(ServerState.valueOf("STP"));
-                synchronized (STPHandler.getInstance()){
-                    STPHandler.getInstance().notifyAll();
+            if(!isRestarted()) {
+                if (rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && !STPHandlerThread.isAlive()) {
+                    JavaHTTPServer.setState(ServerState.valueOf("STP"));
+                    synchronized (STPHandler.getInstance()) {
+                        STPHandler.getInstance().notifyAll();
+                    }
+                    STPHandlerThread.start();
+                } else if (restartSTP) {
+                    STPHandler.getInstance().restartProtocol();
+                    JavaHTTPServer.setState(ServerState.valueOf("STP"));
+                    restartSTP = false;
                 }
-                STPHandlerThread.start();
-            }
-            if(restartSTP){
-                STPHandler.getInstance().restartProtocol();
-                JavaHTTPServer.setState(ServerState.valueOf("STP"));
-                restartSTP = false;
             }
             rttComputedForHosts.clear();
 
@@ -121,7 +122,8 @@ public class RTTHandler implements Runnable{
             RTTable.put(host, System.nanoTime() - startingTimeTable.get(host));
             rttComputedForHosts.add(host);
             startingTimeTable.put(host, new Long(0));
-            System.out.println(RTTable);
+            System.out.println("RTT:" + RTTable);
+            this.notifyAll();
         }
     }
     public synchronized void stop(){
@@ -140,7 +142,7 @@ public class RTTHandler implements Runnable{
         restart = true;
         restartSTP = true;
         RTTMsgSender.setRestarted(true);
-        this.notify();
+        this.notifyAll();
 
     }
 

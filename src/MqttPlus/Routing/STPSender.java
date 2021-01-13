@@ -54,9 +54,11 @@ public class STPSender extends Thread{
             socket.send(packet);
 
             if(!sendFinishRoot && STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT"))) {
-                STPHandler.getInstance().insertLocalRootMessageDestination(dest);
-                if(STPHandler.getInstance().isRootFinished()){
-                    STPHandler.getInstance().sendFinishRootPhase();
+                synchronized (STPHandler.getInstance()) {
+                    STPHandler.getInstance().insertLocalRootMessageDestination(dest);
+                    if (STPHandler.getInstance().isRootFinished()) {
+                        STPHandler.getInstance().sendFinishRootPhase();
+                    }
                 }
             }
 

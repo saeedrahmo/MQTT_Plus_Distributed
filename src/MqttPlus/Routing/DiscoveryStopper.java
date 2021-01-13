@@ -22,9 +22,6 @@ public class DiscoveryStopper extends TimerTask {
     public void run() {
         sender.finish();
         JavaHTTPServer.setState(ServerState.RTT);
-        synchronized (RTTHandler.getInstance()){
-            RTTHandler.getInstance().notifyAll();
-        }
         if(!RTTHandler.isStarted()){
             new Thread(RTTHandler.getInstance()).start();
         }else{

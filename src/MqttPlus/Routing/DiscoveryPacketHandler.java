@@ -40,7 +40,7 @@ public class DiscoveryPacketHandler implements Runnable{
                     JavaHTTPServer.setState(ServerState.DISCOVERY);
                     DiscoveryHandler.getInstance().clearDiscoveredAddresses();
                     synchronized (DiscoveryHandler.getInstance()){
-                        DiscoveryHandler.getInstance().notify();
+                        DiscoveryHandler.getInstance().notifyAll();
                     }
                 }
                 System.out.println(packetContent);

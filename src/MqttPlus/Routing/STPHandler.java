@@ -32,7 +32,7 @@ public class STPHandler implements Runnable{
     private Timer endTimer;
     private boolean isRunning;
     private STPState stpState;
-    private final long endDelay = 10000;
+    private final long endDelay = 8000;
     private boolean waitForFinish;
     private boolean restarted;
 
@@ -343,9 +343,12 @@ public class STPHandler implements Runnable{
 
     public synchronized void cancelTimer(){
         endTimer.cancel();
+        endTimer = new Timer();
     }
 
     public synchronized void restartProtocol(){
+        endTimer.cancel();
+        endTimer = new Timer();
         root = DiscoveryHandler.getInstance().getSelfAddress();
         pathCost = new Long(0);
         rootL = L;

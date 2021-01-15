@@ -52,7 +52,7 @@ public class STPSender extends Thread{
             InetAddress destAddress = InetAddress.getByName(hostname);
             DatagramPacket packet = new DatagramPacket(buf, buf.length, destAddress, new Integer(port));
             socket.send(packet);
-
+            System.out.println("STP PACKET SENT: " + new String(packet.getData(), packet.getOffset(), packet.getLength()));
             if(!sendFinishRoot && STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT"))) {
                 synchronized (STPHandler.getInstance()) {
                     STPHandler.getInstance().insertLocalRootMessageDestination(dest);

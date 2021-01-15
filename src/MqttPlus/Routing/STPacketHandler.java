@@ -20,7 +20,7 @@ public class STPacketHandler implements Runnable{
     public void run() {
         String packetContent = new String(packet.getData(), packet.getOffset(), packet.getLength());
 
-        while(!JavaHTTPServer.getState().equals(ServerState.valueOf("STP")) && !STPHandler.getInstance().getRestarted()){
+        while(!JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))){
             synchronized (STPHandler.getInstance()){
                 try {
                     STPHandler.getInstance().wait();
@@ -29,8 +29,6 @@ public class STPacketHandler implements Runnable{
                 }
             }
         }
-        if(STPHandler.getInstance().getRestarted())
-            return;
 
         if(decodeHeader(packetContent).equals("MQTT+ STP root selection completed")){
             rootFinishedMessage = true;
@@ -49,7 +47,7 @@ public class STPacketHandler implements Runnable{
         }
         System.out.println("STP packet content: " +  packetContent);
 
-        if(STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) && !rootFinishedMessage){
+        if((STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) || STPHandler.getInstance().getState().equals(STPState.valueOf("RESTARTED"))) && !rootFinishedMessage){
             String root = decodeRoot(packetContent);
             Double L = new Double(decodeL(packetContent));
             Double M = new Double(decodeM(packetContent));
@@ -70,7 +68,7 @@ public class STPacketHandler implements Runnable{
                     STPHandler.getInstance().sendFinishRootPhase();
                 }
             }
-        }else if(STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) && rootFinishedMessage){
+        }else if((STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) || STPHandler.getInstance().getState().equals(STPState.valueOf("RESTARTED"))) && rootFinishedMessage){
             synchronized (STPHandler.getInstance()) {
                 String source = decodeSource(packetContent);
                 STPHandler.getInstance().insertRootFinishedMessageSource(source);
@@ -83,23 +81,30 @@ public class STPacketHandler implements Runnable{
             String source = decodeSource(packetContent);
             String root = decodeRoot(packetContent);
             Long pathCost = new Long(decodePathCost(packetContent));
-            if(!root.equals(DiscoveryHandler.getInstance().getSelfAddress())) {
-                synchronized (STPHandler.getInstance()) {
-                    if (STPHandler.getInstance().getPathCost().compareTo(pathCost + RTTHandler.getInstance().getRTT(source)) > 0) {
-                        STPHandler.getInstance().setRoot(source);
-                        STPHandler.getInstance().setPathCost(pathCost + RTTHandler.getInstance().getRTT(source));
-                        for (String proxy : DiscoveryHandler.getInstance().getProxies()) {
-                            new STPSender(proxy, false).start();
+            if(!STPHandler.getInstance().getRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())) {
+                if (!root.equals(DiscoveryHandler.getInstance().getSelfAddress())) {
+                    synchronized (STPHandler.getInstance()) {
+                        if (STPHandler.getInstance().getPathCost().compareTo(pathCost + RTTHandler.getInstance().getRTT(source)) > 0) {
+                            STPHandler.getInstance().setRoot(source);
+                            STPHandler.getInstance().setPathCost(pathCost + RTTHandler.getInstance().getRTT(source));
+                            for (String proxy : DiscoveryHandler.getInstance().getProxies()) {
+                                new STPSender(proxy, false).start();
+                            }
                         }
-                    }
-                    if(STPHandler.getInstance().containsChild(source)){
-                        STPHandler.getInstance().removeChild(source);
-                    }
+                        if (STPHandler.getInstance().containsChild(source)) {
+                            STPHandler.getInstance().removeChild(source);
+                        }
 
+                    }
+                } else {
+                    STPHandler.getInstance().insertChild(source);
                 }
             }else{
-                STPHandler.getInstance().insertChild(source);
-
+                if(root.equals(DiscoveryHandler.getInstance().getSelfAddress())){
+                    STPHandler.getInstance().insertChild(source);
+                }else if(STPHandler.getInstance().containsChild(source) && !root.equals(DiscoveryHandler.getInstance().getSelfAddress())){
+                    STPHandler.getInstance().removeChild(source);
+                }
             }
         }
 

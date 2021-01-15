@@ -46,7 +46,7 @@ public class RTTMsgSender extends Thread{
                 header = "MQTT+ Distributed RTT Message Request:" + requestNumber +"\n";
                 body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
             }else{
-                if(restarted) {
+                if(isRestarted()) {
                     return;
                 }
                 header = "MQTT+ Distributed RTT Message Response:" + requestNumber +"\n";
@@ -59,6 +59,7 @@ public class RTTMsgSender extends Thread{
             String port = destination.split(":")[1];
             InetAddress destAddress = InetAddress.getByName(hostname);
             DatagramPacket packet = new DatagramPacket(buf, buf.length, destAddress, new Integer(port));
+            RTTHandler.getInstance().insertExpirationTimer(requestNumber);
             socket.send(packet);
             System.out.println("Sent: " + content +"\n" + "Destination: " + destination);
             System.out.println(" ");

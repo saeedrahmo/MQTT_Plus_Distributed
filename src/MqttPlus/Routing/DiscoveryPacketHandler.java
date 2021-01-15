@@ -34,10 +34,7 @@ public class DiscoveryPacketHandler implements Runnable{
         if(checkHeader(header) == 0){
             if(!DiscoveryHandler.getInstance().isProxyDiscovered(decodeProxyAddress(packetContent))){
                 if(!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")))){
-                    if(JavaHTTPServer.getState().equals("STP")){
-                        STPHandler.getInstance().setRestarted(true);
-                    }
-                    JavaHTTPServer.setState(ServerState.DISCOVERY);
+                    JavaHTTPServer.setState(ServerState.valueOf("DISCOVERY"));
                     DiscoveryHandler.getInstance().clearDiscoveredAddresses();
                     synchronized (DiscoveryHandler.getInstance()){
                         DiscoveryHandler.getInstance().notifyAll();

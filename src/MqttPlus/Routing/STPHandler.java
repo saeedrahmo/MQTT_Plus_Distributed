@@ -34,11 +34,9 @@ public class STPHandler implements Runnable{
     private STPState stpState;
     private final long endDelay = 8000;
     private boolean waitForFinish;
-    private boolean restarted;
 
     private STPHandler(){
         waitForFinish = false;
-        restarted = false;
         pathCost = new Long(0);
         rootRequestSources = new HashSet<>();
         rootFinishedMessageSources = new HashSet<>();
@@ -268,7 +266,6 @@ public class STPHandler implements Runnable{
     @Override
     public void run() {
         while(getIsRunning()){
-            System.out.println("STP STATE: " + getState());
             for(String proxy:DiscoveryHandler.getInstance().getProxies()){
                 System.out.println("PROXY INSIDE STP HANDLER:" + proxy);
                 new STPSender(proxy, false).start();
@@ -296,9 +293,10 @@ public class STPHandler implements Runnable{
             }
 
             System.out.println("Server state inside STP: " + JavaHTTPServer.getState());
+            System.out.println("STP STATE: " + getState());
 
             if(getState().equals(STPState.valueOf("RESTARTED"))){
-                setState(STPState.ROOT);
+                setState(STPState.valueOf("ROOT"));
             }
             if(getState().equals(STPState.valueOf("NORMAL"))){
                 waitForFinish = true;
@@ -362,18 +360,11 @@ public class STPHandler implements Runnable{
         SRT.getInstance().clearTable();
         PRT.getInstance().clearTable();
         AdvertisementHandling.clearTopics();
-        setRestarted(false);
         setState(STPState.valueOf("RESTARTED"));
         STPHandler.getInstance().notifyAll();
     }
 
-    public synchronized boolean getRestarted(){
-        return restarted;
-    }
 
-    public synchronized void setRestarted(boolean value){
-        restarted = value;
-    }
 }
 
 

@@ -94,9 +94,9 @@ public class DiscoveryHandler implements Runnable{
         }
         while(getIsRunning()){
             while(!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")))){
-                synchronized (this) {
+                synchronized (DiscoveryHandler.getInstance()) {
                     try {
-                        this.wait();
+                        DiscoveryHandler.getInstance().wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -119,6 +119,8 @@ public class DiscoveryHandler implements Runnable{
     public synchronized void clearDiscoveredAddresses(){
         System.out.println("ClearDiscoveredAddresses");
         discoveredAddresses.clear();
+        RTTAddressMap.clear();
+        STPAddressMap.clear();
         discoverySender.finish();
     }
     public synchronized HashMap<String, String> getDiscoveredAddresses(){

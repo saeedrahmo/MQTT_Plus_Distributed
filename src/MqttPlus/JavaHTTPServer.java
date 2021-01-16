@@ -193,21 +193,21 @@ public class JavaHTTPServer implements Runnable{
         //continue to create thread to handle the clients request but block them until discovery is completed
         if(distributedProtocol) {
             while (!this.getState().equals(ServerState.valueOf("NORMAL"))) {
-                /*synchronized (this.discoveryHandler) {
+                synchronized (this.discoveryHandler) {
                     try {
                         this.discoveryHandler.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }*/
+                }
                 //TODO write the code to wake up the working threads when all the process is finished
-                synchronized (this.jsonUtility) {
+                /*synchronized (this.jsonUtility) {
                     try {
                         this.jsonUtility.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }
+                }*/
 
             }
             System.out.println(JavaHTTPServer.getState());

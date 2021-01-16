@@ -85,6 +85,9 @@ public class RTTHandler implements Runnable{
 
             if(!isRestarted()) {
                 if (rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && !STPHandlerThread.isAlive()) {
+                    if(restartSTP){
+                        restartSTP = false;
+                    }
                     JavaHTTPServer.setState(ServerState.valueOf("STP"));
                     STPHandlerThread.start();
                     synchronized (STPHandler.getInstance()) {

@@ -78,6 +78,10 @@ public class DiscoveryHandler implements Runnable{
         return STPAddressMap.get(proxy);
     }
 
+    public synchronized String getBrokerAddress(String proxy){
+        return discoveredAddresses.get(proxy);
+    }
+
     @Override
     public void run(){
         discoverySender.start();

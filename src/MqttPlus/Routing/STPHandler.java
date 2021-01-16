@@ -320,10 +320,10 @@ public class STPHandler implements Runnable{
             @Override
             public void run() {
                 for (String child:children){
-                    ORT.getInstance().insertHop(child);
+                    ORT.getInstance().insertHop(DiscoveryHandler.getInstance().getBrokerAddress(child));
                 }
                 if(!root.equals(DiscoveryHandler.getInstance().getSelfAddress())){
-                    ORT.getInstance().insertHop(root);
+                    ORT.getInstance().insertHop(DiscoveryHandler.getInstance().getBrokerAddress(root));
                 }
                 System.out.println("Dentro STP:" + ORT.getInstance().toString());
                 STPHandler.getInstance().setState(STPState.valueOf("FINISHED"));

@@ -4,6 +4,7 @@ import MqttPlus.JavaHTTPServer;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DiscoverySender extends Thread {
@@ -28,9 +29,15 @@ public class DiscoverySender extends Thread {
             String payloadLineTwo = "Proxy Address: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT;
             String payloadLineThree = "RTT listening on: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + DiscoveryHandler.getInstance().getRTTPort();
             String payloadLineFour = "STP listening on: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + DiscoveryHandler.getInstance().getSTPort();
-            buf = String.join("\n", header, payloadLineOne, payloadLineTwo, payloadLineThree, payloadLineFour).getBytes();
-
+            String id = UUID.randomUUID().toString();
+            while(DiscoveryHandler.getInstance().isIDPresent(id)){
+                id = UUID.randomUUID().toString();
+            }
+            DiscoveryHandler.getInstance().insertDiscoveryMessageID(id);
+            String payloadLineFive = "ID: " + id;
+            buf = String.join("\n", header, payloadLineOne, payloadLineTwo, payloadLineThree, payloadLineFour, payloadLineFive).getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length, group, port);
+
             while(getIsRunning()) {
                 socket.send(packet);
                 TimeUnit.SECONDS.sleep(3);

@@ -22,11 +22,15 @@ public class DiscoveryHandler implements Runnable{
     private DatagramSocket RTTSocket;
     private DatagramSocket STPSocket;
     private RTTHandler rttHandler;
+    private HashSet<String> discoveryMessageIDs;
+    private HashSet<String> receivedMessageIDs;
 
     private DiscoveryHandler(){
         discoveredAddresses = new HashMap<>();
         discoverySender = new DiscoverySender();
         discoveryReceiver = DiscoveryReceiver.getInstance();
+        receivedMessageIDs = new HashSet<>();
+        discoveryMessageIDs = new HashSet<>();
         RTTPort = chooseRTTPort();
         STPort = chooseSTPort();
         RTTAddressMap = new HashMap<>();
@@ -45,6 +49,30 @@ public class DiscoveryHandler implements Runnable{
 
     public synchronized void insertDiscoveredAddress(String proxyAddress, String brokerAddress){
         discoveredAddresses.put(proxyAddress, brokerAddress);
+    }
+
+    public synchronized void insertDiscoveryMessageID(String id){
+        discoveryMessageIDs.add(id);
+    }
+
+    public synchronized void insertReceivedDiscoveryMessageID(String id){
+        receivedMessageIDs.add(id);
+    }
+
+    public synchronized boolean isMessageIDReceived(String id){
+        return receivedMessageIDs.contains(id);
+    }
+
+    public synchronized void clearReceivedMessageIDs(){
+        receivedMessageIDs.clear();
+    }
+
+    public synchronized boolean isIDPresent(String id){
+        return discoveryMessageIDs.contains(id);
+    }
+
+    public synchronized void clearDiscoveryMessageIDs(){
+        discoveryMessageIDs.clear();
     }
 
     public synchronized boolean isProxyDiscovered(String proxyAddress){
@@ -84,19 +112,23 @@ public class DiscoveryHandler implements Runnable{
 
     @Override
     public void run(){
-        discoverySender.start();
         discoveryReceiver.start();
         rttHandler = RTTHandler.getInstance();
-
-
-        DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
-        endTimer.schedule(stopper, discoveryDuration);
-        try {
-            discoverySender.join();
-        }catch (InterruptedException ex ){
-
-        }
         while(getIsRunning()){
+            discoverySender = new DiscoverySender();
+            discoverySender.start();
+            endTimer = new Timer();
+            DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
+            endTimer.schedule(stopper, discoveryDuration);
+            while(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
+                synchronized (DiscoveryHandler.getInstance()){
+                    try {
+                        DiscoveryHandler.getInstance().wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
             while(!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")))){
                 synchronized (DiscoveryHandler.getInstance()) {
                     try {
@@ -106,16 +138,7 @@ public class DiscoveryHandler implements Runnable{
                     }
                 }
             }
-            discoverySender = new DiscoverySender();
-            discoverySender.start();
-            endTimer = new Timer();
-            stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
-            endTimer.schedule(stopper, discoveryDuration);
-            try {
-                discoverySender.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
         }
 
     }

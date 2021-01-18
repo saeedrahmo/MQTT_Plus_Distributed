@@ -58,6 +58,7 @@ public class STPSender extends Thread{
                     STPHandler.getInstance().insertLocalRootMessageDestination(dest);
                     if (STPHandler.getInstance().isRootFinished()) {
                         STPHandler.getInstance().sendFinishRootPhase();
+                        STPHandler.getInstance().setOriginalRoot(STPHandler.getInstance().getRoot());
                     }
                 }
             }

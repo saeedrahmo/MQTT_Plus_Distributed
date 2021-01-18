@@ -66,6 +66,7 @@ public class STPacketHandler implements Runnable{
                 STPHandler.getInstance().insertRootRequestSource(source);
                 if (STPHandler.getInstance().isRootFinished()) {
                     STPHandler.getInstance().sendFinishRootPhase();
+                    STPHandler.getInstance().setOriginalRoot(STPHandler.getInstance().getRoot());
                 }
             }
         }else if((STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) || STPHandler.getInstance().getState().equals(STPState.valueOf("RESTARTED"))) && rootFinishedMessage){

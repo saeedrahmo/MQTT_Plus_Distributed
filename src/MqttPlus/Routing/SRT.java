@@ -66,5 +66,14 @@ public class SRT extends RoutingTable{
         return Matcher.topicMatcher(tableTopic, topic.split("/", 2)[1]);
     }
 
-
+    @Override
+    public synchronized void clearTable() {
+        super.clearTable();
+        HashSet<String> subscriptionsToBeSaved = new HashSet<>();
+        subscriptionsToBeSaved.addAll(subscriptionAdvSent.keySet());
+        subscriptionAdvSent.clear();
+        for (String sub : subscriptionsToBeSaved){
+            recordSubscriptionAdvEmpty(sub);
+        }
+    }
 }

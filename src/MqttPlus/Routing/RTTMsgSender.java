@@ -42,6 +42,7 @@ public class RTTMsgSender extends Thread{
             if(!response) {
                 if(isRestarted()){
                     setRestarted(false);
+                    return;
                 }
                 header = "MQTT+ Distributed RTT Message Request:" + requestNumber +"\n";
                 body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";

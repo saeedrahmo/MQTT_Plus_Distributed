@@ -34,6 +34,7 @@ public class STPHandler implements Runnable{
     private STPState stpState;
     private final long endDelay = 8000;
     private boolean waitForFinish;
+    private String originalRoot;
 
     private STPHandler(){
         waitForFinish = false;
@@ -263,6 +264,14 @@ public class STPHandler implements Runnable{
         return children.contains(child);
     }
 
+    public synchronized void setOriginalRoot(String originalRoot){
+        this.originalRoot = originalRoot;
+    }
+
+    public synchronized String getOriginalRoot(){
+        return originalRoot;
+    }
+
     @Override
     public void run() {
         while(getIsRunning()){
@@ -328,12 +337,12 @@ public class STPHandler implements Runnable{
                 System.out.println("Dentro STP:" + ORT.getInstance().toString());
                 STPHandler.getInstance().setState(STPState.valueOf("FINISHED"));
                 waitForFinish = false;
-                synchronized (STPHandler.getInstance()){
-                    STPHandler.getInstance().notifyAll();
-                }
                 synchronized (DiscoveryHandler.getInstance()) {
                     JavaHTTPServer.setState(ServerState.valueOf("NORMAL"));
                     DiscoveryHandler.getInstance().notifyAll();
+                }
+                synchronized (STPHandler.getInstance()){
+                    STPHandler.getInstance().notifyAll();
                 }
             }
         }, endDelay);
@@ -345,6 +354,7 @@ public class STPHandler implements Runnable{
     }
 
     public synchronized void restartProtocol(){
+        RTTHandler.getInstance().resetRecomputeTopologyCounter();
         endTimer.cancel();
         endTimer = new Timer();
         root = DiscoveryHandler.getInstance().getSelfAddress();
@@ -362,6 +372,7 @@ public class STPHandler implements Runnable{
         AdvertisementHandling.clearTopics();
         setState(STPState.valueOf("RESTARTED"));
         STPHandler.getInstance().notifyAll();
+        waitForFinish = false;
     }
 
 

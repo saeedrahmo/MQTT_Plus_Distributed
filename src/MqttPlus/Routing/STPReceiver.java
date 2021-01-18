@@ -1,5 +1,7 @@
 package MqttPlus.Routing;
 
+import MqttPlus.JavaHTTPServer;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -35,7 +37,11 @@ public class STPReceiver extends Thread{
             DatagramPacket packet = new DatagramPacket(buf, buf.length);
             try {
                 socket.receive(packet);
-                if(STPHandler.getInstance().getState().equals("NORMAL")) {
+                if(JavaHTTPServer.getState().equals(ServerState.valueOf("NORMAL"))){
+                    JavaHTTPServer.setState(ServerState.valueOf("STP"));
+                    STPHandler.getInstance().restartProtocol();
+                }
+                if(STPHandler.getInstance().getState().equals(STPState.valueOf("NORMAL"))) {
                     STPHandler.getInstance().cancelTimer();
                     STPHandler.getInstance().scheduleEndTimer();
                 }

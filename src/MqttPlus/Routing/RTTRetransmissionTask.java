@@ -15,7 +15,7 @@ public class RTTRetransmissionTask extends TimerTask {
     @Override
     public void run() {
         synchronized (RTTHandler.getInstance()) {
-            if (RTTHandler.getInstance().getRetransmissionCount(requestNumber) == 2) {
+            if (RTTHandler.getInstance().getRetransmissionCount(requestNumber) == 2 && !JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
                 System.out.println("PASSIAMO A DISCOVERY");
                 DiscoveryHandler.getInstance().clearDiscoveredAddresses();
                 JavaHTTPServer.setState(ServerState.valueOf("DISCOVERY"));

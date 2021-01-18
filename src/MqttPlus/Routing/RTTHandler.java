@@ -26,6 +26,7 @@ public class RTTHandler implements Runnable{
     private Thread STPHandlerThread;
     private ArrayList<String> rttComputedForHosts;
     private final long retransmissionDelay = 10000;
+    private int recomputeTopologyCounter;
 
     private RTTHandler(){
         stpHandler = STPHandler.getInstance();
@@ -41,7 +42,7 @@ public class RTTHandler implements Runnable{
         isRunning = true;
         restart = false;
         restartSTP = false;
-
+        recomputeTopologyCounter = 0;
     }
 
     public static RTTHandler getInstance(){
@@ -72,7 +73,7 @@ public class RTTHandler implements Runnable{
                     sender.start();
                 }
             }
-            while((!rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && isRunning && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
+            while((!areAllRTTComputed() && getIsRunning() && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
                 synchronized (this){
                     try {
                         this.wait();
@@ -83,8 +84,26 @@ public class RTTHandler implements Runnable{
             }
             System.out.println("Server State: " + JavaHTTPServer.getState());
 
+            if(getRecomputeTopologyCounter() == 5 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
+                System.out.println("RecomputeTopologyCount: " + recomputeTopologyCounter);
+
+                if((getRTT(STPHandler.getInstance().getOriginalRoot()) < STPHandler.getInstance().getPathCost()) && !JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))) {
+                    JavaHTTPServer.setState(ServerState.valueOf("STP"));
+                    STPHandler.getInstance().restartProtocol();
+                }else{
+                    resetRecomputeTopologyCounter();
+                }
+                rttComputedForHosts.clear();
+                try {
+                    TimeUnit.SECONDS.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                continue;
+            }
+
             if(!isRestarted()) {
-                if (rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && !STPHandlerThread.isAlive()) {
+                if (areAllRTTComputed() && !STPHandlerThread.isAlive()) {
                     if(restartSTP){
                         restartSTP = false;
                     }
@@ -93,21 +112,25 @@ public class RTTHandler implements Runnable{
                     synchronized (STPHandler.getInstance()) {
                         STPHandler.getInstance().notifyAll();
                     }
-                } else if (restartSTP) {
-                    //causa errore
+                } else if (areAllRTTComputed() && restartSTP) {
                     JavaHTTPServer.setState(ServerState.valueOf("STP"));
                     STPHandler.getInstance().restartProtocol();
                     restartSTP = false;
                 }
             }
             rttComputedForHosts.clear();
-
             try {
 
                 TimeUnit.SECONDS.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            if(!JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))){
+                incrementRecomputeTopologyCounter();
+            }else{
+                resetRecomputeTopologyCounter();
+            }
+
         }
 
     }
@@ -161,6 +184,7 @@ public class RTTHandler implements Runnable{
         startingTimeTable.clear();
         restart = true;
         restartSTP = true;
+        resetRecomputeTopologyCounter();
         RTTMsgSender.setRestarted(true);
         JavaHTTPServer.setState(ServerState.valueOf("RTT"));
         this.notifyAll();
@@ -222,9 +246,28 @@ public class RTTHandler implements Runnable{
         service.schedule(new RTTRetransmissionTask(requestNumber), retransmissionDelay, TimeUnit.MILLISECONDS);
     }
 
+    public synchronized void incrementRecomputeTopologyCounter(){
+        recomputeTopologyCounter++;
+    }
+
+    public synchronized void resetRecomputeTopologyCounter(){
+        recomputeTopologyCounter = 0;
+    }
+
+    public synchronized int getRecomputeTopologyCounter(){
+        return recomputeTopologyCounter;
+    }
+
     public synchronized Long getRTT(String host){
         return RTTable.get(host);
     }
 
+    public synchronized boolean isRTTComputedForHostsEmpty(){
+        return rttComputedForHosts.isEmpty();
+    }
+
+    public synchronized boolean areAllRTTComputed(){
+        return rttComputedForHosts.containsAll(startingTimeTable.keySet());
+    }
 
 }

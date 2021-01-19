@@ -73,15 +73,18 @@ public class RTTHandler implements Runnable{
                     sender.start();
                 }
             }
-            while((!areAllRTTComputed() && getIsRunning() && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
-                synchronized (this){
+            synchronized (this) {
+                while ((!areAllRTTComputed() && getIsRunning() && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
                     try {
                         this.wait();
+                        System.out.println("condition: " + ((!rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && isRunning && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                 }
             }
+
             System.out.println("Server State: " + JavaHTTPServer.getState());
 
             if(getRecomputeTopologyCounter() == 5 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
@@ -158,7 +161,6 @@ public class RTTHandler implements Runnable{
             RTTable.put(host, System.nanoTime() - startingTimeTable.get(host));
             rttComputedForHosts.add(host);
             startingTimeTable.put(host, new Long(0));
-            System.out.println("condition: " + ((!rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && isRunning && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))));
             this.notifyAll();
             System.out.println("RTT:" + RTTable);
         }

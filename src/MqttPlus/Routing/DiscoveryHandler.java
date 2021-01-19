@@ -120,8 +120,8 @@ public class DiscoveryHandler implements Runnable{
             endTimer = new Timer();
             DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
             endTimer.schedule(stopper, discoveryDuration);
-            while(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
-                synchronized (DiscoveryHandler.getInstance()){
+            synchronized (DiscoveryHandler.getInstance()) {
+                while (JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
                     try {
                         DiscoveryHandler.getInstance().wait();
                     } catch (InterruptedException e) {
@@ -129,13 +129,14 @@ public class DiscoveryHandler implements Runnable{
                     }
                 }
             }
-            while(!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")))){
-                synchronized (DiscoveryHandler.getInstance()) {
+            synchronized (DiscoveryHandler.getInstance()) {
+                while (!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")))) {
                     try {
                         DiscoveryHandler.getInstance().wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                 }
             }
 

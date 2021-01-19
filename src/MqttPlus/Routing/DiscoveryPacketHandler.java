@@ -29,30 +29,30 @@ public class DiscoveryPacketHandler implements Runnable{
 
     @Override
     public void run() {
-        String packetContent = new String(packet.getData(), 0, packet.getLength());
-        String header = decodeHeader(packetContent);
-        if(checkHeader(header) == 0){
-            if(!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) && !DiscoveryHandler.getInstance().isMessageIDReceived(decodeMessageID(packetContent))){
-                System.out.println("BUG");
-                JavaHTTPServer.setState(ServerState.valueOf("DISCOVERY"));
-                DiscoveryHandler.getInstance().clearDiscoveredAddresses();
-                synchronized (DiscoveryHandler.getInstance()){
-                    DiscoveryHandler.getInstance().notifyAll();
+        synchronized (DiscoveryHandler.getInstance()) {
+            String packetContent = new String(packet.getData(), 0, packet.getLength());
+            String header = decodeHeader(packetContent);
+            if (checkHeader(header) == 0) {
+                if (!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) && !DiscoveryHandler.getInstance().isMessageIDReceived(decodeMessageID(packetContent))) {
+                    System.out.println("BUG");
+                    JavaHTTPServer.setState(ServerState.valueOf("DISCOVERY"));
+                    DiscoveryHandler.getInstance().clearDiscoveredAddresses();
+                    synchronized (DiscoveryHandler.getInstance()) {
+                        DiscoveryHandler.getInstance().notifyAll();
+                    }
+                }
+                if (!DiscoveryHandler.getInstance().isProxyDiscovered(decodeProxyAddress(packetContent))) {
+                    System.out.println(packetContent);
+                    System.out.println(decodeRTTAddress(packetContent));
+                    System.out.println(" ");
+                    DiscoveryHandler.getInstance().insertDiscoveredAddress(decodeProxyAddress(packetContent), decodeBrokerAddress(packetContent));
+                    DiscoveryHandler.getInstance().insertDiscoveredRTTAddress(decodeProxyAddress(packetContent), decodeRTTAddress(packetContent));
+                    DiscoveryHandler.getInstance().insertDiscoveredSTPAddress(decodeProxyAddress(packetContent), decodeSTPAddress(packetContent));
+                    DiscoveryHandler.getInstance().insertReceivedDiscoveryMessageID(decodeMessageID(packetContent));
+
                 }
             }
-            if(!DiscoveryHandler.getInstance().isProxyDiscovered(decodeProxyAddress(packetContent))){
-                System.out.println(packetContent);
-                System.out.println(decodeRTTAddress(packetContent));
-                System.out.println(" ");
-                DiscoveryHandler.getInstance().insertDiscoveredAddress(decodeProxyAddress(packetContent), decodeBrokerAddress(packetContent));
-                DiscoveryHandler.getInstance().insertDiscoveredRTTAddress(decodeProxyAddress(packetContent), decodeRTTAddress(packetContent));
-                DiscoveryHandler.getInstance().insertDiscoveredSTPAddress(decodeProxyAddress(packetContent), decodeSTPAddress(packetContent));
-                DiscoveryHandler.getInstance().insertReceivedDiscoveryMessageID(decodeMessageID(packetContent));
-
-            }
         }
-
-
     }
 
     private String decodeProxyAddress(String packet){

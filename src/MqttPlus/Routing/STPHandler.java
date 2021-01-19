@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class STPHandler implements Runnable{
 
@@ -279,20 +282,20 @@ public class STPHandler implements Runnable{
                 System.out.println("PROXY INSIDE STP HANDLER:" + proxy);
                 new STPSender(proxy, false).start();
             }
-            while(waitForFinish){
-                synchronized (STPHandler.getInstance()){
+            synchronized (STPHandler.getInstance()) {
+                while (waitForFinish) {
                     try {
                         STPHandler.getInstance().wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                 }
             }
 
             //TODO verify the condition below
-
-            while((STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) || STPHandler.getInstance().getState().equals(STPState.valueOf("FINISHED"))) || !JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))){
-                synchronized (STPHandler.getInstance()){
+            synchronized (STPHandler.getInstance()) {
+                while ((STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT")) || STPHandler.getInstance().getState().equals(STPState.valueOf("FINISHED")))) {
                     try {
                         STPHandler.getInstance().wait();
                     } catch (InterruptedException e) {
@@ -338,8 +341,10 @@ public class STPHandler implements Runnable{
                 STPHandler.getInstance().setState(STPState.valueOf("FINISHED"));
                 waitForFinish = false;
                 synchronized (DiscoveryHandler.getInstance()) {
-                    JavaHTTPServer.setState(ServerState.valueOf("NORMAL"));
-                    DiscoveryHandler.getInstance().notifyAll();
+                    if(!JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
+                        JavaHTTPServer.setState(ServerState.valueOf("NORMAL"));
+                        DiscoveryHandler.getInstance().notifyAll();
+                    }
                 }
                 synchronized (STPHandler.getInstance()){
                     STPHandler.getInstance().notifyAll();

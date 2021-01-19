@@ -20,8 +20,8 @@ public class STPacketHandler implements Runnable{
     public void run() {
         String packetContent = new String(packet.getData(), packet.getOffset(), packet.getLength());
 
-        while(!JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))){
-            synchronized (STPHandler.getInstance()){
+        synchronized (STPHandler.getInstance()) {
+            while (!JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))) {
                 try {
                     STPHandler.getInstance().wait();
                 } catch (InterruptedException e) {
@@ -35,13 +35,14 @@ public class STPacketHandler implements Runnable{
         }
 
         if (STPHandler.getInstance().isRootFinished() && !rootFinishedMessage) {
-            while (STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT"))) {
-                synchronized (STPHandler.getInstance()) {
+            synchronized (STPHandler.getInstance()) {
+                while (STPHandler.getInstance().getState().equals(STPState.valueOf("ROOT"))) {
                     try {
                         STPHandler.getInstance().wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
                 }
             }
         }

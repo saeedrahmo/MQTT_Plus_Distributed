@@ -23,8 +23,8 @@ public class RTTMsgSender extends Thread{
     @Override
     public void run() {
 
-        while(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
-            synchronized (RTTHandler.getInstance()){
+        synchronized (RTTHandler.getInstance()) {
+            while (JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
                 try {
                     RTTHandler.getInstance().wait();
                 } catch (InterruptedException e) {
@@ -32,49 +32,50 @@ public class RTTMsgSender extends Thread{
                 }
             }
         }
-
-        try {
-            System.out.println("Dentro sender");
-            DatagramSocket socket = new DatagramSocket();
-            byte[] buf;
-            String header;
-            String body;
-            if(!response) {
-                if(isRestarted()){
-                    setRestarted(false);
-                    return;
+        synchronized (DiscoveryHandler.getInstance()) {
+            try {
+                System.out.println("Dentro sender");
+                DatagramSocket socket = new DatagramSocket();
+                byte[] buf;
+                String header;
+                String body;
+                if (!response) {
+                    if (isRestarted()) {
+                        setRestarted(false);
+                        return;
+                    }
+                    header = "MQTT+ Distributed RTT Message Request:" + requestNumber + "\n";
+                    body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
+                } else {
+                    if (isRestarted()) {
+                        return;
+                    }
+                    header = "MQTT+ Distributed RTT Message Response:" + requestNumber + "\n";
+                    body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
                 }
-                header = "MQTT+ Distributed RTT Message Request:" + requestNumber +"\n";
-                body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
-            }else{
-                if(isRestarted()) {
-                    return;
+                String content = header + body;
+                buf = content.getBytes();
+                String destination = DiscoveryHandler.getInstance().getRTTAddress(destTableAcces);
+                String hostname = destination.split(":")[0];
+                String port = destination.split(":")[1];
+                InetAddress destAddress = InetAddress.getByName(hostname);
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, destAddress, new Integer(port));
+                RTTHandler.getInstance().insertExpirationTimer(requestNumber);
+                socket.send(packet);
+                System.out.println("Sent: " + content + "\n" + "Destination: " + destination);
+                System.out.println(" ");
+                if (!response) {
+                    RTTHandler.getInstance().addStartingTime(destTableAcces);
                 }
-                header = "MQTT+ Distributed RTT Message Response:" + requestNumber +"\n";
-                body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
-            }
-            String content = header+body;
-            buf = content.getBytes();
-            String destination = DiscoveryHandler.getInstance().getRTTAddress(destTableAcces);
-            String hostname = destination.split(":")[0];
-            String port = destination.split(":")[1];
-            InetAddress destAddress = InetAddress.getByName(hostname);
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, destAddress, new Integer(port));
-            RTTHandler.getInstance().insertExpirationTimer(requestNumber);
-            socket.send(packet);
-            System.out.println("Sent: " + content +"\n" + "Destination: " + destination);
-            System.out.println(" ");
-            if(!response) {
-                RTTHandler.getInstance().addStartingTime(destTableAcces);
-            }
-            socket.close();
+                socket.close();
 
-        } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

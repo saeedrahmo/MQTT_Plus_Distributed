@@ -3,14 +3,18 @@ package MqttPlus.Routing;
 import MqttPlus.JavaHTTPServer;
 
 import java.net.*;
+import java.sql.Time;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class DiscoveryHandler implements Runnable{
     private static DiscoveryHandler instance = null;
     private HashMap<String, String> discoveredAddresses;
     private DiscoveryReceiver discoveryReceiver;
     private DiscoverySender discoverySender;
-    private Timer endTimer;
+    private ScheduledExecutorService endTimer;
     private final long discoveryDuration = 10000; //duration of the discovery protocol in ms
     private long startingTime;
     private final String selfAddress = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT;
@@ -24,6 +28,7 @@ public class DiscoveryHandler implements Runnable{
     private RTTHandler rttHandler;
     private HashSet<String> discoveryMessageIDs;
     private HashSet<String> receivedMessageIDs;
+    private boolean isRestarted;
 
     private DiscoveryHandler(){
         discoveredAddresses = new HashMap<>();
@@ -35,7 +40,7 @@ public class DiscoveryHandler implements Runnable{
         STPort = chooseSTPort();
         RTTAddressMap = new HashMap<>();
         STPAddressMap = new HashMap<>();
-        endTimer = new Timer();
+        endTimer = Executors.newScheduledThreadPool(1);
         isRunning = true;
     }
 
@@ -115,13 +120,14 @@ public class DiscoveryHandler implements Runnable{
         discoveryReceiver.start();
         rttHandler = RTTHandler.getInstance();
         while(getIsRunning()){
+            setIsRestarted(false);
             discoverySender = new DiscoverySender();
             discoverySender.start();
-            endTimer = new Timer();
+            endTimer = Executors.newScheduledThreadPool(1);
             DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
-            endTimer.schedule(stopper, discoveryDuration);
+            endTimer.schedule(stopper, discoveryDuration, TimeUnit.MILLISECONDS);
             synchronized (DiscoveryHandler.getInstance()) {
-                while (JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
+                while (JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")) && !isRestarted()) {
                     try {
                         DiscoveryHandler.getInstance().wait();
                     } catch (InterruptedException e) {
@@ -130,7 +136,7 @@ public class DiscoveryHandler implements Runnable{
                 }
             }
             synchronized (DiscoveryHandler.getInstance()) {
-                while (!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY")))) {
+                while (!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) && !isRestarted()) {
                     try {
                         DiscoveryHandler.getInstance().wait();
                     } catch (InterruptedException e) {
@@ -150,6 +156,9 @@ public class DiscoveryHandler implements Runnable{
         RTTAddressMap.clear();
         STPAddressMap.clear();
         discoverySender.finish();
+        endTimer.shutdownNow();
+        setIsRestarted(true);
+        this.notifyAll();
     }
     public synchronized HashMap<String, String> getDiscoveredAddresses(){
         return (HashMap<String, String>) discoveredAddresses.clone();
@@ -223,6 +232,24 @@ public class DiscoveryHandler implements Runnable{
 
     public int getSTPort(){
         return STPort;
+    }
+    public synchronized void setNewStopper(){
+        synchronized (DiscoveryStopper.class) {
+            if(!JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
+                endTimer.shutdownNow();
+                endTimer = Executors.newScheduledThreadPool(1);
+                DiscoveryStopper stopper = new DiscoveryStopper(discoveryReceiver, discoverySender);
+                endTimer.schedule(stopper, discoveryDuration, TimeUnit.MILLISECONDS);
+            }
+        }
+    }
+
+    public synchronized boolean isRestarted(){
+        return isRestarted;
+    }
+
+    public synchronized void setIsRestarted(boolean value){
+        isRestarted = value;
     }
 
 

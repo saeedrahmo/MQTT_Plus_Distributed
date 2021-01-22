@@ -41,14 +41,16 @@ public class DiscoveryPacketHandler implements Runnable{
                         DiscoveryHandler.getInstance().notifyAll();
                     }
                 }
+                DiscoveryHandler.getInstance().insertReceivedDiscoveryMessageID(decodeMessageID(packetContent));
+
                 if (!DiscoveryHandler.getInstance().isProxyDiscovered(decodeProxyAddress(packetContent))) {
+                    DiscoveryHandler.getInstance().setNewStopper();
                     System.out.println(packetContent);
                     System.out.println(decodeRTTAddress(packetContent));
                     System.out.println(" ");
                     DiscoveryHandler.getInstance().insertDiscoveredAddress(decodeProxyAddress(packetContent), decodeBrokerAddress(packetContent));
                     DiscoveryHandler.getInstance().insertDiscoveredRTTAddress(decodeProxyAddress(packetContent), decodeRTTAddress(packetContent));
                     DiscoveryHandler.getInstance().insertDiscoveredSTPAddress(decodeProxyAddress(packetContent), decodeSTPAddress(packetContent));
-                    DiscoveryHandler.getInstance().insertReceivedDiscoveryMessageID(decodeMessageID(packetContent));
 
                 }
             }

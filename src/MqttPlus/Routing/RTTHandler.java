@@ -3,10 +3,7 @@ package MqttPlus.Routing;
 import MqttPlus.JavaHTTPServer;
 
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class RTTHandler implements Runnable{
 
@@ -58,6 +55,7 @@ public class RTTHandler implements Runnable{
         System.out.println("Inside RTTHandler");
         while(getIsRunning()){
             setRestart(false);
+            RTTMsgSender.setRestarted(false);
             for (String proxy : DiscoveryHandler.getInstance().getProxies()){
                 System.out.println("PROXY: " + proxy);
 
@@ -238,8 +236,12 @@ public class RTTHandler implements Runnable{
         retransmissionMap.remove(requestNumber);
     }
 
-    public synchronized void removeExpirationTimer(String requestNumber){
-        expirationMap.remove(requestNumber).shutdownNow();
+    public synchronized ScheduledExecutorService removeExpirationTimer(String requestNumber){
+        ScheduledExecutorService service = expirationMap.remove(requestNumber);
+        if(service!= null){
+            service.shutdownNow();
+        }
+        return service;
     }
 
     public synchronized void insertExpirationTimer(String requestNumber){

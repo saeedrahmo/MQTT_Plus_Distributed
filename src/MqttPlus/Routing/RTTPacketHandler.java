@@ -18,7 +18,9 @@ public class RTTPacketHandler implements Runnable{
         System.out.println("Packet received: " + packetContent);
         System.out.println(" ");
         if(packetContent.contains("Response")){
-            RTTHandler.getInstance().removeExpirationTimer(decodeRequestNumber(packetContent));
+            if(RTTHandler.getInstance().removeExpirationTimer(decodeRequestNumber(packetContent))== null){
+                return;
+            }
             if (!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) && !RTTMsgSender.isRestarted() && RTTHandler.getInstance().containsRequest(decodeRequestNumber(packetContent))) {
                 System.out.println("Inside response receiver");
                 RTTHandler.getInstance().removeRequestNumber(decodeRequestNumber(packetContent));
@@ -27,6 +29,15 @@ public class RTTPacketHandler implements Runnable{
             }
 
         }else if(packetContent.contains("Request")){
+            synchronized (RTTHandler.getInstance()) {
+                while (JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
+                    try {
+                        RTTHandler.getInstance().wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
             RTTMsgSender sender = new RTTMsgSender(decodeDestination(packetContent), true, decodeRequestNumber(packetContent));
             sender.start();
         }

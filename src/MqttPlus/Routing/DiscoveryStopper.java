@@ -17,22 +17,23 @@ public class DiscoveryStopper extends TimerTask {
 
     }
 
-
     @Override
     public void run() {
-        System.out.println("discoveryStopper");
-        sender.finish();
-        if(!RTTHandler.isStarted()){
-            JavaHTTPServer.setState(ServerState.valueOf("RTT"));
-            new Thread(RTTHandler.getInstance()).start();
-            synchronized (RTTHandler.getInstance()){
-                RTTHandler.getInstance().notifyAll();
+        synchronized (DiscoveryStopper.class) {
+            System.out.println("discoveryStopper");
+            sender.finish();
+            if (!RTTHandler.isStarted()) {
+                JavaHTTPServer.setState(ServerState.valueOf("RTT"));
+                new Thread(RTTHandler.getInstance()).start();
+                synchronized (RTTHandler.getInstance()) {
+                    RTTHandler.getInstance().notifyAll();
+                }
+            } else {
+                RTTHandler.getInstance().restartHandler();
             }
-        }else{
-            RTTHandler.getInstance().restartHandler();
-        }
-        synchronized (DiscoveryHandler.getInstance()){
-            DiscoveryHandler.getInstance().notifyAll();
+            synchronized (DiscoveryHandler.getInstance()) {
+                DiscoveryHandler.getInstance().notifyAll();
+            }
         }
     }
 

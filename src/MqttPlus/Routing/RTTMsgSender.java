@@ -8,13 +8,28 @@ import java.net.*;
 public class RTTMsgSender extends Thread{
 
     private String destIp;
-    private String destTableAcces;
+    private String destTableAccess;
     private final boolean response; // true for response, false for fist message
     private static boolean restarted;
     private String requestNumber;
+    private Thread stateObserver;
 
     public RTTMsgSender(String dest, boolean response, String requestNumber){
-        destTableAcces = dest;
+        RTTMsgSender instance = this;
+        stateObserver = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean run = true;
+                while(run){
+                    if(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))){
+                        instance.interrupt();
+                        run = false;
+                    }
+                }
+            }
+        });
+        stateObserver.start();
+        destTableAccess = dest;
         this.response = response;
         restarted = false;
         this.requestNumber = requestNumber;
@@ -23,15 +38,6 @@ public class RTTMsgSender extends Thread{
     @Override
     public void run() {
 
-        synchronized (RTTHandler.getInstance()) {
-            while (JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
-                try {
-                    RTTHandler.getInstance().wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
         synchronized (DiscoveryHandler.getInstance()) {
             try {
                 System.out.println("Dentro sender");
@@ -40,14 +46,14 @@ public class RTTMsgSender extends Thread{
                 String header;
                 String body;
                 if (!response) {
-                    if (isRestarted()) {
+                    if (isRestarted() || DiscoveryHandler.getInstance().isRestarted()) {
                         setRestarted(false);
                         return;
                     }
                     header = "MQTT+ Distributed RTT Message Request:" + requestNumber + "\n";
                     body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
                 } else {
-                    if (isRestarted()) {
+                    if (isRestarted() || DiscoveryHandler.getInstance().isRestarted()) {
                         return;
                     }
                     header = "MQTT+ Distributed RTT Message Response:" + requestNumber + "\n";
@@ -55,7 +61,10 @@ public class RTTMsgSender extends Thread{
                 }
                 String content = header + body;
                 buf = content.getBytes();
-                String destination = DiscoveryHandler.getInstance().getRTTAddress(destTableAcces);
+                String destination = DiscoveryHandler.getInstance().getRTTAddress(destTableAccess);
+                if(destination == null){
+                    return;
+                }
                 String hostname = destination.split(":")[0];
                 String port = destination.split(":")[1];
                 InetAddress destAddress = InetAddress.getByName(hostname);
@@ -65,7 +74,7 @@ public class RTTMsgSender extends Thread{
                 System.out.println("Sent: " + content + "\n" + "Destination: " + destination);
                 System.out.println(" ");
                 if (!response) {
-                    RTTHandler.getInstance().addStartingTime(destTableAcces);
+                    RTTHandler.getInstance().addStartingTime(destTableAccess);
                 }
                 socket.close();
 

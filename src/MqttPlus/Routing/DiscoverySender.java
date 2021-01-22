@@ -40,7 +40,7 @@ public class DiscoverySender extends Thread {
 
             while(getIsRunning()) {
                 socket.send(packet);
-                TimeUnit.SECONDS.sleep(3);
+                TimeUnit.SECONDS.sleep(1);
             }
 
             socket.close();

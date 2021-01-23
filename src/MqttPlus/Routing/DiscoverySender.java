@@ -29,9 +29,9 @@ public class DiscoverySender extends Thread {
             String payloadLineTwo = "Proxy Address: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT;
             String payloadLineThree = "RTT listening on: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + DiscoveryHandler.getInstance().getRTTPort();
             String payloadLineFour = "STP listening on: " + AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + DiscoveryHandler.getInstance().getSTPort();
-            String id = UUID.randomUUID().toString();
+            String id = UUID.randomUUID().toString() + DiscoveryHandler.getInstance().getSelfAddress();
             while(DiscoveryHandler.getInstance().isIDPresent(id)){
-                id = UUID.randomUUID().toString();
+                id = UUID.randomUUID().toString() + DiscoveryHandler.getInstance().getSelfAddress();
             }
             DiscoveryHandler.getInstance().insertDiscoveryMessageID(id);
             String payloadLineFive = "ID: " + id;

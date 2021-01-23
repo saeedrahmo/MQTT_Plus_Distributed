@@ -2,6 +2,7 @@ package MqttPlus.Handlers;
 
 import MqttPlus.JavaHTTPServer;
 import MqttPlus.Routing.AdvertisementHandling;
+import MqttPlus.Routing.DiscoveryHandler;
 import MqttPlus.Routing.PRT;
 import MqttPlus.Routing.SRT;
 import MqttPlus.Sematic.SemanticException;
@@ -135,9 +136,9 @@ public class SubscriptionHandler {
         client.toBlocking().connectWith().keepAlive(240);
         client.toBlocking().connect();*/
 
-        String id = ("SRT" + (new Integer(MQTTPublish.getBrokerPort())).toString() + UUID.randomUUID().toString()).substring(0, 22);
+        String id = "SRT" + DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
         while(SRT.getInstance().containsClientID(id)){
-            id = ("SRT" + (new Integer(MQTTPublish.getBrokerPort())).toString() + UUID.randomUUID().toString()).substring(0, 22);
+            id = "SRT" + DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
         }
         String hostname = brokerAddress.split(":")[0];
         String port = brokerAddress.split(":")[1];

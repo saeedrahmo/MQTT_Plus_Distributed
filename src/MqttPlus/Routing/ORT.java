@@ -38,9 +38,9 @@ public class ORT{
         String hostname = broker.split(":")[0];
         String port = broker.split(":")[1];
         if (!clients.containsKey(broker)) {
-            String id = ("ORT" + (new Integer(MQTTPublish.getBrokerPort()).toString())+ UUID.randomUUID().toString()).substring(0, 22);
+            String id = "ORT" + DiscoveryHandler.getInstance().getSelfAddress().toString()+ UUID.randomUUID().toString();
             while (clientIDs.contains(id)){
-                id = ("ORT" + (new Integer(MQTTPublish.getBrokerPort()).toString())+ UUID.randomUUID().toString()).substring(0, 22);
+                id = "ORT" + DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
             }
             Mqtt3Client client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
             clients.put(broker, client);

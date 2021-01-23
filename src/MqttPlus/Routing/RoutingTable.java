@@ -40,9 +40,9 @@ public abstract class RoutingTable {
             Mqtt3Client client;
             String id;
             if(this instanceof PRT){
-                id = ("PRT@" + AdvertisementHandling.myHostname(JavaHTTPServer.local) + UUID.randomUUID().toString()).substring(0, 18);
+                id = "PRT@" + DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
                 while(clientIDs.contains(id)){
-                    id = ("PRT@"+ AdvertisementHandling.myHostname(JavaHTTPServer.local) + UUID.randomUUID().toString()).substring(0, 18);
+                    id = "PRT@"+ DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
                 }
                 client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
                 client.toAsync().connect();

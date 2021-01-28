@@ -278,9 +278,11 @@ public class STPHandler implements Runnable{
     @Override
     public void run() {
         while(getIsRunning()){
+            int numberOfProxies = 0;
             for(String proxy:DiscoveryHandler.getInstance().getProxies()){
                 System.out.println("PROXY INSIDE STP HANDLER:" + proxy);
                 new STPSender(proxy, false).start();
+                numberOfProxies++;
             }
             synchronized (STPHandler.getInstance()) {
                 while (waitForFinish) {
@@ -290,6 +292,17 @@ public class STPHandler implements Runnable{
                         e.printStackTrace();
                     }
 
+                }
+            }
+            if(numberOfProxies == 0){
+                STPHandler.getInstance().setState(STPState.valueOf("FINISHED"));
+                setRoot(DiscoveryHandler.getInstance().getSelfAddress());
+                setPathCost(new Long(0));
+                synchronized (DiscoveryHandler.getInstance()) {
+                    if(!JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
+                        JavaHTTPServer.setState(ServerState.valueOf("NORMAL"));
+                        DiscoveryHandler.getInstance().notifyAll();
+                    }
                 }
             }
 

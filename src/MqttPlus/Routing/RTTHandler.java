@@ -56,6 +56,7 @@ public class RTTHandler implements Runnable{
         while(getIsRunning()){
             setRestart(false);
             RTTMsgSender.setRestarted(false);
+            int proxyCount = 0;
             for (String proxy : DiscoveryHandler.getInstance().getProxies()){
                 System.out.println("PROXY: " + proxy);
 
@@ -69,6 +70,7 @@ public class RTTHandler implements Runnable{
                     retransmissionMap.put(requestNumber, new Integer(0));
                     RTTMsgSender sender = new RTTMsgSender(proxy, false, requestNumber);
                     sender.start();
+                    proxyCount++;
                 }
             }
             synchronized (this) {
@@ -85,7 +87,7 @@ public class RTTHandler implements Runnable{
 
             System.out.println("Server State: " + JavaHTTPServer.getState());
 
-            if(getRecomputeTopologyCounter() == 5 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
+            if(proxyCount != 0 && getRecomputeTopologyCounter() == 5 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
                 System.out.println("RecomputeTopologyCount: " + recomputeTopologyCounter);
 
                 if((getRTT(STPHandler.getInstance().getOriginalRoot()) < STPHandler.getInstance().getPathCost()) && !JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))) {

@@ -1,6 +1,7 @@
 package MqttPlus.Routing;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 
 import MqttPlus.Handlers.PublishHandler;
@@ -68,19 +69,35 @@ public class AdvertisementHandling {
         client.toBlocking().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
     }
 
-    public static String myHostname(boolean local){
-        if(local){
+    public static String myHostname(boolean local) {
+        if (local) {
             return new String("localhost:" + MQTTPublish.getBrokerPort());
-        }else{
+        } else {
             String ip = null;
+            Enumeration e = null;
             try {
-                URL whatismyip = new URL("http://checkip.amazonaws.com");
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        whatismyip.openStream()));
-                ip = in.readLine(); //you get the IP as a String
-            }finally {
-                return new String(ip+":"+MQTTPublish.getBrokerPort());
+                e = NetworkInterface.getNetworkInterfaces();
+                while (e.hasMoreElements()) {
+                    NetworkInterface n = (NetworkInterface) e.nextElement();
+                    Enumeration ee = n.getInetAddresses();
+                    while (ee.hasMoreElements()) {
+                        InetAddress i = (InetAddress) ee.nextElement();
+                        if (System.getenv("IP_ADDR") == null) {
+                            if (i.getHostAddress().contains("172")) {
+                                ip = i.getHostAddress();
+                                return new String(ip + ":" + MQTTPublish.getBrokerPort());
+                            }
+                        } else {
+                            ip = System.getenv("IP_ADDR");
+                            return new String(ip + ":" + MQTTPublish.getBrokerPort());
+                        }
+                    }
+                }
+            } catch (SocketException socketException) {
+                socketException.printStackTrace();
             }
+            return new String("localhost:" + MQTTPublish.getBrokerPort());
+
         }
     }
 

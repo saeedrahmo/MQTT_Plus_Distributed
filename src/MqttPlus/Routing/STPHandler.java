@@ -69,8 +69,7 @@ public class STPHandler implements Runnable{
                             if (!reader.ready()) break;
                             String line = reader.readLine();
                             if(line.contains("MemTotal")){
-                                String[] partialResult = line.split(" ");
-                                M = new Double(partialResult[7]);
+                                M = new Double(line.replaceAll("[^\\d.]", ""));
                                 rootM = M;
                                 //The value of the memory saved is in kB
                                 break;
@@ -98,8 +97,7 @@ public class STPHandler implements Runnable{
                             if (!reader.ready()) break;
                             String line = reader.readLine();
                             if(line.contains("cpu MHz")){
-                                String[] partialResult = line.split(" ");
-                                L = new Double(partialResult[2]);
+                                L = new Double(line.replaceAll("[^\\d.]", ""));
                                 rootL = L;
                                 //The L value is in MHz
                                 break;

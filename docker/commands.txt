@@ -1,0 +1,7 @@
+docker run -it --rm --name test0  -e DISTRIBUTED_FLAG=true -e WS_PORT=8080 -e BROKER_PORT=1883 -e BROKER_NUM=0 mqttplus
+
+docker run -it --rm --name test1 -e DISTRIBUTED_FLAG=true -e WS_PORT=8081 -e BROKER_PORT=1884 -e BROKER_NUM=1 mqttplus
+
+
+
+opzionale per usare rete locale macchina host --net=host

@@ -44,7 +44,7 @@ public class JavaHTTPServer implements Runnable{
     private final JSONUtility jsonUtility; //to be removed
 
 
-    public static final boolean local = true;
+    public static boolean local;
     public static boolean distributedProtocol = true;
     private static String topology;
     private static int numberOfBrokers;
@@ -76,6 +76,7 @@ public class JavaHTTPServer implements Runnable{
                 distributedProtocol = new Boolean(args[2]);
                 topology = new String(args[3]);
                 numberOfBrokers = Integer.valueOf(args[4]);
+                local = new Boolean(args[5]);
 
             }catch(IndexOutOfBoundsException ex){
 

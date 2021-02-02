@@ -7,6 +7,7 @@ ENV TOPOLOGY tree
 ENV CLUSTER_SIZE 7
 ENV BROKER_NUM 1
 ENV LOCAL_FLAG false
+ENV IP_ADDR 172.0.0.2
 
 RUN apt-get update \ 
     && apt-get install -y --no-install-recommends cmake \

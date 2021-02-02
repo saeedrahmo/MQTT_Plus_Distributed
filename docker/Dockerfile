@@ -22,7 +22,8 @@ RUN apt-get update \
     iproute2 \
     tcpdump \
     iperf \
-    net-tools
+    net-tools \
+    netcat
 
 
 RUN git clone https://github.com/LeoStaglia/mosquitto.git \
@@ -36,6 +37,8 @@ RUN git clone https://github.com/LeoStaglia/mosquitto.git \
 WORKDIR /home/mqttplus/
 
 RUN git clone https://github.com/LeoStaglia/MQTT_Plus_Distributed.git
+
+#EXPOSE 4447 4448 4449 4450 4451 4452 4453 
 
 COPY start.sh /usr/bin/
 RUN chmod +x /usr/bin/start.sh 

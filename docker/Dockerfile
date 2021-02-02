@@ -19,7 +19,12 @@ RUN apt-get update \
     docbook-xsl \
     net-tools \
     iputils-ping \
-    iproute2 
+    iproute2 \
+    tcpdump \
+    iperf \
+    busybox-extras \
+    iputils \
+    net-tools
 
 
 RUN git clone https://github.com/LeoStaglia/mosquitto.git \

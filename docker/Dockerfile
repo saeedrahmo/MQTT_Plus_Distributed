@@ -22,8 +22,6 @@ RUN apt-get update \
     iproute2 \
     tcpdump \
     iperf \
-    busybox-extras \
-    iputils \
     net-tools
 
 

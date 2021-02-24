@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
@@ -67,6 +68,7 @@ public class JavaHTTPServer implements Runnable{
 
 
     public static void main(String[] args) {
+        System.out.println("Startup of the broker at: " + Instant.now());
         try {
             
             PORT = Integer.parseInt(args[0]);

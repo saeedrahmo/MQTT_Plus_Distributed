@@ -8,6 +8,6 @@ sleep 3
 
 echo "Executing mosquitto-ST+ ..."
 
-mosquitto -v -c /mosquitto/config/broker"${BROKER_NUM}".conf -ws "${WS_PORT}" -distr "${DISTRIBUTED_FLAG}"
+mosquitto -v -c /mosquitto/config/${DISTRIBUTED_FLAG}/broker"${BROKER_NUM}".conf -ws "${WS_PORT}" -distr "${DISTRIBUTED_FLAG}"
 
 exit 1

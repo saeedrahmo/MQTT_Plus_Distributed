@@ -14,6 +14,7 @@ import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.time.Instant;
 
 public class STPHandler implements Runnable{
 
@@ -350,6 +351,7 @@ public class STPHandler implements Runnable{
                 }
                 System.out.println("Dentro STP:" + ORT.getInstance().toString());
                 STPHandler.getInstance().setState(STPState.valueOf("FINISHED"));
+                System.out.println("Tree is formed at: " + Instant.now());
                 waitForFinish = false;
                 synchronized (DiscoveryHandler.getInstance()) {
                     if(!JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {

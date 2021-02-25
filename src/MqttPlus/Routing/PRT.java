@@ -48,7 +48,7 @@ public class PRT extends RoutingTable{
             System.out.println("Dentro forward broker " +  broker);
             if (!publish.getClientId().contains(broker)) {
                 Mqtt3Client client = PRT.getInstance().getClient(broker);
-                client.toBlocking().publishWith().topic(publish.getTopic()).payload(publish.getPayload().toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
+                client.toBlocking().publishWith().topic(publish.getTopic()).payload(publish.getPayload().toString().getBytes()).qos(MqttQos.AT_MOST_ONCE).send();
 
 
                         //HiveMQ client: TODO remove

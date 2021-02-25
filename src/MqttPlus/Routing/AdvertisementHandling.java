@@ -66,7 +66,7 @@ public class AdvertisementHandling {
                     client.toBlocking().connect();
             }
         }
-        client.toBlocking().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
+        client.toBlocking().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_MOST_ONCE).send();
     }
 
     public static String myHostname(boolean local) {

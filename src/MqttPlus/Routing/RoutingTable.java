@@ -40,9 +40,9 @@ public abstract class RoutingTable {
             Mqtt3Client client;
             String id;
             if(this instanceof PRT){
-                id = "PRT@" + DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
+                id = "PRT@" + DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+MQTTPublish.getBrokerPort();
                 while(clientIDs.contains(id)){
-                    id = "PRT@"+ DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
+                    id = "PRT@"+ DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+MQTTPublish.getBrokerPort();
                 }
                 client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
                 client.toAsync().connect();
@@ -111,5 +111,8 @@ public abstract class RoutingTable {
         clients.clear();
     }
 
-
+    @Override
+    public String toString() {
+        return routingTable.toString();
+    }
 }

@@ -136,9 +136,9 @@ public class SubscriptionHandler {
         client.toBlocking().connectWith().keepAlive(240);
         client.toBlocking().connect();*/
 
-        String id = "SRT" + DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
+        String id = "SRT" + DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+ MQTTPublish.getBrokerPort() + UUID.randomUUID().toString();
         while(SRT.getInstance().containsClientID(id)){
-            id = "SRT" + DiscoveryHandler.getInstance().getSelfAddress() + UUID.randomUUID().toString();
+            id = "SRT" + DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+ MQTTPublish.getBrokerPort() + UUID.randomUUID().toString();
         }
         String hostname = brokerAddress.split(":")[0];
         String port = brokerAddress.split(":")[1];

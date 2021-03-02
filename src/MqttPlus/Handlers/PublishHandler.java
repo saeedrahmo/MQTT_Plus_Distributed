@@ -68,6 +68,10 @@ public class PublishHandler {
                 AdvertisementHandling.addTopic(publish.getTopic());
                 AdvertisementHandling.advertise(publish.getTopic(), publish.getPayload(), JavaHTTPServer.local);
             } else if (PRT.getInstance().findTopic(publish.getTopic())) {
+                System.out.println("TABELLE");
+                System.out.println(PRT.getInstance());
+                System.out.println(SRT.getInstance());
+                System.out.println(ORT.getInstance());
                 PRT.getInstance().forwardPublish(publish);
             }
         }

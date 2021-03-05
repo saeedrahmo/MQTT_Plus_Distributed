@@ -61,9 +61,10 @@ public class RTTHandler implements Runnable{
                 System.out.println("PROXY: " + proxy);
 
                 if(!(proxy.equals(AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT))) {
-                    String requestNumber = UUID.randomUUID().toString();
+                    String ip = DiscoveryHandler.getInstance().getSelfAddress().split(":")[0];
+                    String requestNumber = UUID.randomUUID().toString().substring(0, 4) + ip.split("\\.")[0] + ip.split("\\.")[1] + ip.split("\\.")[2] + ip.split("\\.")[3];
                     while(containsRequest(requestNumber)){
-                        requestNumber = UUID.randomUUID().toString();
+                        requestNumber = UUID.randomUUID().toString().substring(0, 4) + ip.split("\\.")[0] + ip.split("\\.")[1] + ip.split("\\.")[2] + ip.split("\\.")[3];
                     }
                     insertRequestNumber(requestNumber, proxy);
                     startingTimeTable.put(proxy, new Long(0));

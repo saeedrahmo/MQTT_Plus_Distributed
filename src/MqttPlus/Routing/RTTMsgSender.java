@@ -50,13 +50,13 @@ public class RTTMsgSender extends Thread{
                         setRestarted(false);
                         return;
                     }
-                    header = "MQTT+ Distributed RTT Message Request:" + requestNumber + "\n";
+                    header = "MQTT+ RTT Request:" + requestNumber + "\n";
                     body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
                 } else {
                     if (isRestarted() || DiscoveryHandler.getInstance().isRestarted()) {
                         return;
                     }
-                    header = "MQTT+ Distributed RTT Message Response:" + requestNumber + "\n";
+                    header = "MQTT+ RTT Response:" + requestNumber + "\n";
                     body = AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT + "\n";
                 }
                 String content = header + body;

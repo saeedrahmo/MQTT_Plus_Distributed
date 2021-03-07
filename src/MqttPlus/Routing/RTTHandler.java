@@ -88,7 +88,7 @@ public class RTTHandler implements Runnable{
 
             System.out.println("Server State: " + JavaHTTPServer.getState());
 
-            if(proxyCount != 0 && getRecomputeTopologyCounter() == 5 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
+            if(proxyCount != 0 && getRecomputeTopologyCounter() == 60 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
                 System.out.println("RecomputeTopologyCount: " + recomputeTopologyCounter);
 
                 if((getRTT(STPHandler.getInstance().getOriginalRoot()) < STPHandler.getInstance().getPathCost()) && !JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))) {

@@ -15,6 +15,8 @@ public class RTTPacketHandler implements Runnable{
     @Override
     public void run() {
         String packetContent = new String(packet.getData(), packet.getOffset(), packet.getLength());
+        String address = packet.getSocketAddress().toString();
+        System.out.println("ADDRESS FROM PACKET:" + address);
         System.out.println("Packet received: " + packetContent);
         System.out.println(" ");
         if(packetContent.contains("Response")){

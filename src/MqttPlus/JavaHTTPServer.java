@@ -108,12 +108,12 @@ public class JavaHTTPServer implements Runnable{
                         MQTTPublish.disconnectClient();
                 }
             });
-            //ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(200);
             while (true) {
 
                 // create dedicated thread to manage the client connection
                 Runnable myServer = new JavaHTTPServer(serverConnect.accept(), JSONUtility.getInstance(topology, numberOfBrokers));
-                new Thread(myServer).start();
+                executor.submit(myServer);
 
                 if (verbose) {
                     System.out.println("Connecton opened. (" + new Date() + ")");

@@ -49,6 +49,7 @@ public class PublishHandler {
             if (publish.getTopic().contains("@")) {
                 String hostname = publish.getTopic().split("@")[1];
                 String cleanTopic = publish.getTopic().split("@")[0];
+                MQTTPublish.sendPublish(cleanTopic, publish.getPayload());
 
                 SRT subscriptionRoutingTable = SRT.getInstance();
                 subscriptionRoutingTable.insertTopic(cleanTopic, hostname);

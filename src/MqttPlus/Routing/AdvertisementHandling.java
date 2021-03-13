@@ -60,23 +60,13 @@ public class AdvertisementHandling {
     }
 
     private static void publish(String broker, String topic, Object payload){
-        MqttClient client = ORT.getInstance().getClient(broker);
+        Mqtt3Client client = ORT.getInstance().getClient(broker);
         synchronized (client) {
-            if (!client.isConnected()) {
-                try {
-                    client.connect();
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
+            if (!client.getState().isConnected()) {
+                    client.toBlocking().connect();
             }
         }
-        MqttMessage message = new MqttMessage(payload.toString().getBytes());
-        message.setQos(0);
-        try {
-            client.publish(topic, message);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        client.toAsync().publishWith().topic(topic).payload(payload.toString().getBytes()).qos(MqttQos.AT_MOST_ONCE).send();
     }
 
     public static String myHostname(boolean local) {

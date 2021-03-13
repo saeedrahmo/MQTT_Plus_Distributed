@@ -3,15 +3,15 @@ package MqttPlus.Routing;
 import MqttPlus.JavaHTTPServer;
 import MqttPlus.Utils.MQTTPublish;
 import MqttPlus.Utils.Matcher;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
+import com.hivemq.client.mqtt.MqttClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import org.json.HTTP;
 
 import java.util.*;
 
 public abstract class RoutingTable {
     private final HashMap<String, HashSet<String>> routingTable;
-    private HashMap<String, MqttClient> clients;
+    private HashMap<String, Mqtt3Client> clients;
     private ArrayList<String> clientIDs;
 
     //Hop format is "address:port"
@@ -37,20 +37,16 @@ public abstract class RoutingTable {
         String hostname = hop.split(":")[0];
         String port = hop.split(":")[1];
         if(!clients.containsKey(hop)){
-            MqttClient client;
+            Mqtt3Client client;
             String id;
             if(this instanceof PRT){
                 id = "PRT@" + DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+MQTTPublish.getBrokerPort();
                 while(clientIDs.contains(id)){
                     id = "PRT@"+ DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+MQTTPublish.getBrokerPort();
                 }
-                try {
-                    client = new MqttClient("tcp://"+hop, id);
-                    client.connect();
-                    clients.put(hop, client);
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
+                client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
+                client.toAsync().connect();
+                clients.put(hop, client);
 
             }
 
@@ -89,18 +85,14 @@ public abstract class RoutingTable {
         System.out.println(routingTable);
     }
 
-    public synchronized MqttClient getClient(String hop){
+    public synchronized Mqtt3Client getClient(String hop){
         return clients.get(hop);
     }
 
     public synchronized void disconnectClients(){
         for(String hop : clients.keySet()){
-            if(clients.get(hop).isConnected()) {
-                try {
-                    clients.get(hop).disconnect();
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
+            if(clients.get(hop).getState().isConnected()) {
+                clients.get(hop).toBlocking().disconnect();
             }
         }
     }
@@ -111,13 +103,9 @@ public abstract class RoutingTable {
     public synchronized void clearTable(){
         routingTable.clear();
         clientIDs.clear();
-        for (MqttClient client: clients.values()){
-            if(client.isConnected()){
-                try {
-                    client.disconnect();
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
+        for (Mqtt3Client client: clients.values()){
+            if(client.getState().isConnected()){
+                client.toAsync().disconnect();
             }
         }
         clients.clear();

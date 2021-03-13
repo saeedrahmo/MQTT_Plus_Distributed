@@ -2,17 +2,18 @@ package MqttPlus.Routing;
 
 import MqttPlus.JavaHTTPServer;
 import MqttPlus.Utils.MQTTPublish;
-import com.hivemq.client.mqtt.MqttClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 
 import java.util.*;
 
 public class ORT{
 
     private HashSet<String> oneHopBrokers;
-    private HashMap<String, Mqtt3Client> clients;
+    private HashMap<String, MqttClient> clients;
     private ArrayList<String> clientIDs;
 
     //Here we don't use any HashMap since it's a representation of an overlay network
@@ -42,7 +43,12 @@ public class ORT{
             while (clientIDs.contains(id)){
                 id = "ORT" + DiscoveryHandler.getInstance().getSelfAddress();
             }
-            Mqtt3Client client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
+            MqttClient client = null;
+            try {
+                client = new MqttClient("tcp://"+broker, id);
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
             clients.put(broker, client);
 
         }
@@ -64,14 +70,18 @@ public class ORT{
         return oneHopBrokers.toString();
     }
 
-    public synchronized Mqtt3Client getClient(String broker){
+    public synchronized MqttClient getClient(String broker){
         return clients.get(broker);
     }
 
     public synchronized void disconnectClients(){
         for(String broker : clients.keySet()){
-            if(clients.get(broker).getState().isConnected()) {
-                clients.get(broker).toBlocking().disconnect();
+            if(clients.get(broker).isConnected()) {
+                try {
+                    clients.get(broker).disconnect();
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -83,9 +93,13 @@ public class ORT{
     public synchronized void clearTable(){
         oneHopBrokers.clear();
         clientIDs.clear();
-        for (Mqtt3Client client: clients.values()){
-            if(client.getState().isConnected()){
-                client.toAsync().disconnect();
+        for (MqttClient client: clients.values()){
+            if(client.isConnected()){
+                try {
+                    client.disconnect();
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
             }
         }
         clients.clear();

@@ -18,7 +18,7 @@ public class MQTTPublish {
     private static MqttClient client;
 
     public synchronized static void sendPublish(String topic,Object payload) {
-        int qos = 2;
+        int qos = 0;
         if(!client.isConnected()){
             try {
                 client.connect();

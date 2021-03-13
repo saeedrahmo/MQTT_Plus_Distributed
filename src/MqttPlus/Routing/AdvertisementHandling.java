@@ -71,7 +71,7 @@ public class AdvertisementHandling {
             }
         }
         MqttMessage message = new MqttMessage(payload.toString().getBytes());
-        message.setQos(2);
+        message.setQos(0);
         try {
             client.publish(topic, message);
         } catch (MqttException e) {

@@ -49,7 +49,7 @@ public class PRT extends RoutingTable{
             if (!publish.getClientId().contains(broker)) {
                 MqttClient client = PRT.getInstance().getClient(broker);
                 MqttMessage message = new MqttMessage(publish.getPayload().toString().getBytes());
-                message.setQos(2);
+                message.setQos(0);
                 try {
                     client.publish(publish.getTopic(), message);
                 } catch (MqttException e) {

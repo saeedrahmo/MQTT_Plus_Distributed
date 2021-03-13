@@ -42,7 +42,7 @@ public class ORT{
             while (clientIDs.contains(id)){
                 id = "ORT" + DiscoveryHandler.getInstance().getSelfAddress();
             }
-            Mqtt3Client client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
+            Mqtt3Client client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().build();
             clients.put(broker, client);
 
         }

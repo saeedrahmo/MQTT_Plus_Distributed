@@ -44,7 +44,7 @@ public abstract class RoutingTable {
                 while(clientIDs.contains(id)){
                     id = "PRT@"+ DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+MQTTPublish.getBrokerPort();
                 }
-                client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().buildBlocking();
+                client = MqttClient.builder().identifier(id).serverPort(new Integer(port)).serverHost(hostname).useMqttVersion3().build();
                 client.toAsync().connect();
                 clients.put(hop, client);
 

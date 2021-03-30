@@ -40,7 +40,6 @@ public class RTTMsgSender extends Thread{
 
         synchronized (DiscoveryHandler.getInstance()) {
             try {
-                System.out.println("Dentro sender");
                 DatagramSocket socket = new DatagramSocket();
                 byte[] buf;
                 String header;
@@ -71,8 +70,6 @@ public class RTTMsgSender extends Thread{
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, destAddress, new Integer(port));
                 RTTHandler.getInstance().insertExpirationTimer(requestNumber);
                 socket.send(packet);
-                System.out.println("Sent: " + content + "\n" + "Destination: " + destination);
-                System.out.println(" ");
                 if (!response) {
                     RTTHandler.getInstance().addStartingTime(destTableAccess);
                 }

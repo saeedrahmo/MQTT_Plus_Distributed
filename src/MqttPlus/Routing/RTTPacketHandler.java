@@ -16,7 +16,6 @@ public class RTTPacketHandler implements Runnable{
     public void run() {
         String packetContent = new String(packet.getData(), packet.getOffset(), packet.getLength());
         String address = packet.getSocketAddress().toString();
-        System.out.println("ADDRESS FROM PACKET:" + address);
         System.out.println("Packet received: " + packetContent);
         System.out.println(" ");
         if(packetContent.contains("Response")){
@@ -24,7 +23,6 @@ public class RTTPacketHandler implements Runnable{
                 return;
             }
             if (!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) && !RTTMsgSender.isRestarted() && RTTHandler.getInstance().containsRequest(decodeRequestNumber(packetContent))) {
-                System.out.println("Inside response receiver");
                 RTTHandler.getInstance().removeRequestNumber(decodeRequestNumber(packetContent));
                 RTTHandler.getInstance().removeRetransmissionCount(decodeRequestNumber(packetContent));
                 RTTHandler.getInstance().computeRTT(decodeDestination(packetContent));

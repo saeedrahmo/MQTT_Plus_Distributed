@@ -70,12 +70,13 @@ public class JavaHTTPServer implements Runnable{
     public static void main(String[] args) {
         System.out.println("Startup of the broker at: " + Instant.now());
         try {
-            
+
             PORT = Integer.parseInt(args[0]);
             String brokerPort = args[1];
+            distributedProtocol = new Boolean(args[2]);
+
             try{
 
-                distributedProtocol = new Boolean(args[2]);
                 topology = new String(args[3]);
                 numberOfBrokers = Integer.valueOf(args[4]);
                 local = new Boolean(args[5]);
@@ -202,15 +203,6 @@ public class JavaHTTPServer implements Runnable{
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-                    //TODO write the code to wake up the working threads when all the process is finished
-                /*synchronized (this.jsonUtility) {
-                    try {
-                        this.jsonUtility.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }*/
 
                 }
             }

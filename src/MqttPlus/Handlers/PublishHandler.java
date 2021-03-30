@@ -55,7 +55,6 @@ public class PublishHandler {
                 subscriptionRoutingTable.insertTopic(cleanTopic, hostname);
 
                 AdvertisementHandling.forward(cleanTopic, publish.getPayload(), JavaHTTPServer.local, hostname);
-                //MQTTPublish.sendPublish(cleanTopic, publish.getPayload());
                 publish.setTopic(cleanTopic);
 
                     if (!SRT.getInstance().isSubAdvSent(cleanTopic, hostname)) {
@@ -69,16 +68,14 @@ public class PublishHandler {
                 AdvertisementHandling.addTopic(publish.getTopic());
                 AdvertisementHandling.advertise(publish.getTopic(), publish.getPayload(), JavaHTTPServer.local);
             } else if (PRT.getInstance().findTopic(publish.getTopic())) {
-                System.out.println("TABELLE");
-                System.out.println(PRT.getInstance());
-                System.out.println(SRT.getInstance());
-                System.out.println(ORT.getInstance());
+                System.out.println("PRT: " + PRT.getInstance());
+                System.out.println("SRT: " + SRT.getInstance());
+                System.out.println("ORT: " + ORT.getInstance());
                 PRT.getInstance().forwardPublish(publish);
             }
         }
 
 
-        //System.out.println("Received PUBLISH from CLIENT: "+ publish.getClientId() +", TOPIC: "+ publish.getTopic());
 
         DataType inputDT = getInputDT(publish.getPayload());
 

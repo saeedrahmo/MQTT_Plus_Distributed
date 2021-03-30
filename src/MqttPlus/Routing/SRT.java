@@ -47,7 +47,6 @@ public class SRT extends RoutingTable{
                 result.add(sub);
             }
         }
-        System.out.println("RISULTATO: " + result);
         return result;
     }
 

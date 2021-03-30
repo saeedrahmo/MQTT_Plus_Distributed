@@ -279,7 +279,6 @@ public class STPHandler implements Runnable{
         while(getIsRunning()){
             int numberOfProxies = 0;
             for(String proxy:DiscoveryHandler.getInstance().getProxies()){
-                System.out.println("PROXY INSIDE STP HANDLER:" + proxy);
                 new STPSender(proxy, false).start();
                 numberOfProxies++;
             }
@@ -316,8 +315,6 @@ public class STPHandler implements Runnable{
                 }
             }
 
-            System.out.println("Server state inside STP: " + JavaHTTPServer.getState());
-            System.out.println("STP STATE: " + getState());
 
             if(getState().equals(STPState.valueOf("RESTARTED"))){
                 setState(STPState.valueOf("ROOT"));
@@ -349,7 +346,7 @@ public class STPHandler implements Runnable{
                 if(!root.equals(DiscoveryHandler.getInstance().getSelfAddress())){
                     ORT.getInstance().insertHop(DiscoveryHandler.getInstance().getBrokerAddress(root));
                 }
-                System.out.println("Dentro STP:" + ORT.getInstance().toString());
+                System.out.println("ORT:" + ORT.getInstance().toString());
                 STPHandler.getInstance().setState(STPState.valueOf("FINISHED"));
                 System.out.println("Tree is formed at: " + Instant.now());
                 waitForFinish = false;

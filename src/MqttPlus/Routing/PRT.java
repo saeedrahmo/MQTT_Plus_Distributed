@@ -50,36 +50,6 @@ public class PRT extends RoutingTable{
                 Mqtt3Client client = PRT.getInstance().getClient(broker);
                 client.toAsync().publishWith().topic(publish.getTopic()).payload(publish.getPayload().toString().getBytes()).qos(MqttQos.AT_MOST_ONCE).send();
 
-
-                        //HiveMQ client: TODO remove
-                        /*try {
-                            Mqtt3Client client = MqttClient.builder().useMqttVersion3().identifier("HTTPServer@" + AdvertisementHandling.myHostname(JavaHTTPServer.local) + index.toString()).serverHost(hostname).serverPort(new Integer(port)).buildAsync();
-                            client.toBlocking().connectWith().keepAlive(240).cleanSession(true);
-                            client.toBlocking().connect();
-                            client.toBlocking().publishWith().topic(publish.getTopic()).payload(publish.getPayload().toString().getBytes()).qos(MqttQos.AT_LEAST_ONCE).send();
-                            client.toBlocking().disconnect();
-                        }catch(Exception ex){
-                           ex.printStackTrace();
-                        }*/
-
-                        //Paho client: TODO remove
-                /*try {
-                    MqttConnectOptions opts = new MqttConnectOptions();
-                    MemoryPersistence memoryPersistence = new MemoryPersistence();
-                    opts.setKeepAliveInterval(240);
-                    MqttClient client = new MqttClient("tcp://" + broker, "HTTPServer@" + AdvertisementHandling.myHostname(JavaHTTPServer.local) + index.toString(), memoryPersistence);
-                    client.connect(opts);
-                    MqttMessage message = new MqttMessage(publish.getPayload().toString().getBytes());
-                    message.setQos(2);
-                    client.publish(publish.getTopic(), message);
-                    client.disconnect();
-                }catch (MqttPersistenceException e) {
-                            e.printStackTrace();
-                } catch (MqttSecurityException e) {
-                            e.printStackTrace();
-                } catch (MqttException e) {
-                            e.printStackTrace();
-                }*/
             }
         }
     }

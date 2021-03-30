@@ -143,7 +143,6 @@ public class STPacketHandler implements Runnable{
         STPHandler.getInstance().setRoot(root);
         STPHandler.getInstance().setRootL(L);
         STPHandler.getInstance().setRootM(M);
-        System.out.println("Setting the new root, RTT:" + RTTHandler.getInstance().getRTT(root));
         STPHandler.getInstance().setPathCost(RTTHandler.getInstance().getRTT(root));
     }
 }

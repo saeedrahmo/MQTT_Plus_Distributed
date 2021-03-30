@@ -151,7 +151,6 @@ public class DiscoveryHandler implements Runnable{
     }
 
     public synchronized void clearDiscoveredAddresses(){
-        System.out.println("ClearDiscoveredAddresses");
         discoveredAddresses.clear();
         RTTAddressMap.clear();
         STPAddressMap.clear();

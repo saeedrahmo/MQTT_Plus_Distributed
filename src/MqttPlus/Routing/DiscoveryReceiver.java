@@ -33,13 +33,6 @@ public class DiscoveryReceiver extends Thread{
         return instance;
     }
 
-   /* public String getMulticastAddress(){
-        return multicastAddress;
-    }
-
-    public MulticastSocket getSocket(){
-        return socket;
-    }*/
 
     public synchronized boolean getIsRunning(){
         return isRunning;

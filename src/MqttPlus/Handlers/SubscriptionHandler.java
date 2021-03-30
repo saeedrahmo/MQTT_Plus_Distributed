@@ -130,11 +130,6 @@ public class SubscriptionHandler {
     }
 
     public void sendSubscription(String topic, String brokerAddress){
-        /*String hostname = brokerAddress.split(":")[0];
-        String port = brokerAddress.split(":")[1];
-        Mqtt3Client client = MqttClient.builder().identifier(UUID.randomUUID().toString()).serverHost(hostname).serverPort(new Integer(port)).useMqttVersion3().build();
-        client.toBlocking().connectWith().keepAlive(240);
-        client.toBlocking().connect();*/
 
         String id = "SRT" + DiscoveryHandler.getInstance().getSelfAddress().split(":")[0]+":"+ MQTTPublish.getBrokerPort() + UUID.randomUUID().toString();
         while(SRT.getInstance().containsClientID(id)){
@@ -162,15 +157,6 @@ public class SubscriptionHandler {
             JSONArray subscriptionArray = obj.getJSONArray(TOPIC_KEY);
             JSONArray returnArray = new JSONArray();
             String subscriberId = obj.getString(SUBSCRIBER_KEY);
-            /*JSONArray bridgeArray = obj.getJSONArray(BRIDGE_KEY);
-            for (int i = 0; i<bridgeArray.length(); i++){
-                JSONObject bridge = bridgeArray.getJSONObject(i);
-                String bridgeHostname = bridge.getString("address");
-                int bridgePort = bridge.getInt("port");
-                System.out.println("Brigde print: " + bridgeHostname + " " + bridgePort);
-            }*/
-
-
 
             System.out.println("Received SUBSCRIPTION from CLIENT: " + subscriberId + " to topics: " + subscriptionArray );
 

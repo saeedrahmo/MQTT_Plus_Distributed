@@ -52,14 +52,11 @@ public class RTTHandler implements Runnable{
     @Override
     public void run() {
         setIsStarted(true);
-        System.out.println("Inside RTTHandler");
         while(getIsRunning()){
             setRestart(false);
             RTTMsgSender.setRestarted(false);
             int proxyCount = 0;
             for (String proxy : DiscoveryHandler.getInstance().getProxies()){
-                System.out.println("PROXY: " + proxy);
-
                 if(!(proxy.equals(AdvertisementHandling.myHostname(JavaHTTPServer.local).split(":")[0] + ":" + JavaHTTPServer.PORT))) {
                     String ip = DiscoveryHandler.getInstance().getSelfAddress().split(":")[0];
                     String requestNumber = UUID.randomUUID().toString().substring(0, 4) + ip.split("\\.")[0] + ip.split("\\.")[1] + ip.split("\\.")[2] + ip.split("\\.")[3];
@@ -78,7 +75,6 @@ public class RTTHandler implements Runnable{
                 while ((!areAllRTTComputed() && getIsRunning() && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) {
                     try {
                         this.wait();
-                        System.out.println("condition: " + ((!rttComputedForHosts.containsAll(getStartingTimeTableKeySet()) && isRunning && !isRestarted()) || JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -88,8 +84,7 @@ public class RTTHandler implements Runnable{
 
             System.out.println("Server State: " + JavaHTTPServer.getState());
 
-            if(proxyCount != 0 && getRecomputeTopologyCounter() == 60 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
-                System.out.println("RecomputeTopologyCount: " + recomputeTopologyCounter);
+            if(proxyCount != 0 && getRecomputeTopologyCounter() == 10 && !isRestarted() && areAllRTTComputed() && !STPHandler.getInstance().getOriginalRoot().equals(DiscoveryHandler.getInstance().getSelfAddress())){
 
                 if((getRTT(STPHandler.getInstance().getOriginalRoot()) < STPHandler.getInstance().getPathCost()) && !JavaHTTPServer.getState().equals(ServerState.valueOf("STP"))) {
                     JavaHTTPServer.setState(ServerState.valueOf("STP"));
@@ -153,8 +148,6 @@ public class RTTHandler implements Runnable{
 
     public synchronized void addStartingTime(String host){
         startingTimeTable.put(host, System.nanoTime());
-        System.out.println("ADD STARTING TIME: "+startingTimeTable);
-        System.out.println("RTT Table: " + RTTable);
     }
 
     public synchronized void computeRTT(String host){
@@ -163,7 +156,6 @@ public class RTTHandler implements Runnable{
             rttComputedForHosts.add(host);
             startingTimeTable.put(host, new Long(0));
             this.notifyAll();
-            System.out.println("RTT:" + RTTable);
         }
     }
     public synchronized void stop(){
@@ -175,7 +167,6 @@ public class RTTHandler implements Runnable{
     }
 
     public synchronized void restartHandler(){
-        System.out.println("restartHandler");
         retransmissionMap.clear();
         for(String requestNumber : expirationMap.keySet()){
             expirationMap.get(requestNumber).shutdownNow();

@@ -34,7 +34,6 @@ public class DiscoveryPacketHandler implements Runnable{
             String header = decodeHeader(packetContent);
             if (checkHeader(header) == 0) {
                 if (!(JavaHTTPServer.getState().equals(ServerState.valueOf("DISCOVERY"))) && !DiscoveryHandler.getInstance().isMessageIDReceived(decodeMessageID(packetContent))) {
-                    System.out.println("BUG");
                     JavaHTTPServer.setState(ServerState.valueOf("DISCOVERY"));
                     DiscoveryHandler.getInstance().clearDiscoveredAddresses();
                     synchronized (DiscoveryHandler.getInstance()) {
@@ -46,7 +45,6 @@ public class DiscoveryPacketHandler implements Runnable{
                 if (!DiscoveryHandler.getInstance().isProxyDiscovered(decodeProxyAddress(packetContent))) {
                     DiscoveryHandler.getInstance().setNewStopper();
                     System.out.println(packetContent);
-                    System.out.println(decodeRTTAddress(packetContent));
                     System.out.println(" ");
                     DiscoveryHandler.getInstance().insertDiscoveredAddress(decodeProxyAddress(packetContent), decodeBrokerAddress(packetContent));
                     DiscoveryHandler.getInstance().insertDiscoveredRTTAddress(decodeProxyAddress(packetContent), decodeRTTAddress(packetContent));

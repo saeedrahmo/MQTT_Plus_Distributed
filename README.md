@@ -15,7 +15,7 @@ As can be seen there are three mandatory arguments: the number of the port used 
 
 Upon the startup of the Java Server the Mosquitto broker can be started using the following command
 ```
-mosquitto -p *broker_port* -ws server_port -distr distributed_flag
+mosquitto -p broker_port -ws server_port -distr distributed_flag
 ```
 The three parameters have exactly the same meaning of the ones used to launch the JAR.
 

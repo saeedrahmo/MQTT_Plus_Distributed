@@ -345,7 +345,7 @@ public class JavaHTTPServer implements Runnable{
         try {
             Date d1 = format.parse(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));
             Date d2 = format.parse(startingTimeStamp);
-            long diff = d2.getTime() - d1.getTime();
+            long diff = d1.getTime() - d2.getTime();
             long diffSeconds = diff / 1000 % 60;
 
             System.out.println("Packet processing time:" + diffSeconds);

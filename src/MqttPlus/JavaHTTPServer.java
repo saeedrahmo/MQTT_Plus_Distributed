@@ -21,6 +21,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.StringTokenizer;
@@ -49,7 +51,6 @@ public class JavaHTTPServer implements Runnable{
     public static boolean distributedProtocol = true;
     private static String topology;
     private static int numberOfBrokers;
-
     private static int count = 0;
     // port to listen connection
     public static int PORT;
@@ -68,7 +69,6 @@ public class JavaHTTPServer implements Runnable{
 
 
     public static void main(String[] args) {
-        System.out.println("Startup of the broker at: " + Instant.now());
         try {
 
             PORT = Integer.parseInt(args[0]);
@@ -93,6 +93,7 @@ public class JavaHTTPServer implements Runnable{
             }
             ServerSocket serverConnect = new ServerSocket(PORT);
             System.out.println("Server started.\nListening for connections on port : " + PORT + " ...\n");
+            System.out.println(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));
             TimerHandler timerHandler = TimerHandler.getInstance();
             timerHandler.start();
             // we listen until user halts server execution
@@ -248,6 +249,7 @@ public class JavaHTTPServer implements Runnable{
 
             body = body.replace("\\","\\\\");
             JSONObject obj = new JSONObject(body);
+            String timestamp = obj.getString("timestamp");
 
             System.out.println(body);
 
@@ -290,6 +292,7 @@ public class JavaHTTPServer implements Runnable{
                 writeResponse(new JSONObject());
                 UnsubcriptionHandler.getInstance().handleDisconnect(obj);
             }
+            computeDuration(timestamp);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -302,6 +305,8 @@ public class JavaHTTPServer implements Runnable{
                 e.printStackTrace();
             }
         }
+        //here we place the code to obtain the time instant.
+
     }
 
     private void getResponse(String url){
@@ -335,5 +340,18 @@ public class JavaHTTPServer implements Runnable{
         state = newState;
     }
 
+    public static void computeDuration(String startingTimeStamp){
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
+        try {
+            Date d1 = format.parse(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));
+            Date d2 = format.parse(startingTimeStamp);
+            long diff = d2.getTime() - d1.getTime();
+            long diffSeconds = diff / 1000 % 60;
+
+            System.out.println("Packet processing time:" + diffSeconds);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

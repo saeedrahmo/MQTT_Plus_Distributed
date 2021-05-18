@@ -14,6 +14,9 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.json.JSONObject;
 
 import java.sql.SQLOutput;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
@@ -74,8 +77,11 @@ public class PublishHandler {
                 PRT.getInstance().forwardPublish(publish);
             }
         }
-
-
+        System.out.println("PROVA COMPUTEDURATION");
+        String payloadString = publish.getPayload().toString();
+        String timestampWithQuotes = payloadString.split("timestamp: ")[1];
+        String timestamp = timestampWithQuotes.substring(1, 16);
+        computeDuration(timestamp);
 
         DataType inputDT = getInputDT(publish.getPayload());
 
@@ -182,6 +188,22 @@ public class PublishHandler {
         return DataType.STRING;
 
 
+    }
+
+    private void computeDuration(String startingTimeStamp){
+        System.out.println("Dentro computeDuration");
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
+        try {
+            Date d1 = format.parse(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));
+            Date d2 = format.parse(startingTimeStamp);
+            long diff = d1.getTime() - d2.getTime();
+            long diffSeconds = diff / 1000 % 60;
+
+            System.out.println("Packet processing time:" + diffSeconds);
+        } catch (ParseException e) {
+            if (startingTimeStamp.equals(""))
+                return;
+        }
     }
 
 

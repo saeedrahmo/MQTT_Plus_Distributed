@@ -283,12 +283,6 @@ public class JavaHTTPServer implements Runnable{
             else if(action.equals(PUBLISH)){
                 writeResponse(new JSONObject());
                 PublishHandler.getInstance().handlePublish(obj);
-
-                Publish publish = Publish.parsePublish(obj);
-                String payloadString = publish.getPayload().toString();
-                String timestampWithQuotes = payloadString.split("timestamp: ")[1];
-                timestamp = timestampWithQuotes.substring(1, 16);
-                computeDuration(timestamp);
             }
             else if(action.equals(UNSUBSCRIPTION)){
                 UnsubcriptionHandler.getInstance().handleUnsubscription(obj);
@@ -301,7 +295,6 @@ public class JavaHTTPServer implements Runnable{
                 writeResponse(new JSONObject());
                 UnsubcriptionHandler.getInstance().handleDisconnect(obj);
             }
-            System.out.println("PRIMA DI computeDuration");
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -347,20 +340,5 @@ public class JavaHTTPServer implements Runnable{
         state = newState;
     }
 
-    public void computeDuration(String startingTimeStamp){
-        System.out.println("Dentro computeDuration");
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
-        try {
-            Date d1 = format.parse(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));
-            Date d2 = format.parse(startingTimeStamp);
-            long diff = d1.getTime() - d2.getTime();
-            long diffSeconds = diff / 1000 % 60;
-
-            System.out.println("Packet processing time:" + diffSeconds);
-        } catch (ParseException e) {
-            if (startingTimeStamp.equals(""))
-                return;
-        }
-    }
 
 }

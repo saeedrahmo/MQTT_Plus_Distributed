@@ -253,11 +253,10 @@ public class JavaHTTPServer implements Runnable{
             JSONObject obj = new JSONObject(body);
             String timestamp = new String();
             if(action.equals(PUBLISH)){
-                JSONParser parser = new JSONParser();
                 Publish publish = Publish.parsePublish(obj);
                 String payloadString = publish.getPayload().toString();
-                JSONObject jsonPayload = (JSONObject) parser.parse(payloadString);
-                timestamp = jsonPayload.getString("timestamp");
+                String timestampWithQuotes = payloadString.split("timestamp: ")[1];
+                timestamp = timestampWithQuotes.substring(1, 16);
 
             }
 
@@ -306,8 +305,6 @@ public class JavaHTTPServer implements Runnable{
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (org.json.simple.parser.ParseException e) {
             e.printStackTrace();
         } finally {
             try {

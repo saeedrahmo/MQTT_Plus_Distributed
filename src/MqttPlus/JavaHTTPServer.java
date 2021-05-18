@@ -30,6 +30,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import MqttPlus.Publish.Publish;
+import org.json.simple.parser.JSONParser;
 
 public class JavaHTTPServer implements Runnable{
 
@@ -250,8 +252,13 @@ public class JavaHTTPServer implements Runnable{
             body = body.replace("\\","\\\\");
             JSONObject obj = new JSONObject(body);
             String timestamp = new String();
-            if(!action.equals(SUBSCRIPTION)){
-                timestamp = obj.getString("timestamp");
+            if(action.equals(PUBLISH)){
+                JSONParser parser = new JSONParser();
+                Publish publish = Publish.parsePublish(obj);
+                String payloadString = publish.getPayload().toString();
+                JSONObject jsonPayload = (JSONObject) parser.parse(payloadString);
+                timestamp = jsonPayload.getString("timestamp");
+
             }
 
             System.out.println(body);
@@ -300,8 +307,9 @@ public class JavaHTTPServer implements Runnable{
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
+        } catch (org.json.simple.parser.ParseException e) {
+            e.printStackTrace();
+        } finally {
             try {
                 in.close();
             } catch (IOException e) {

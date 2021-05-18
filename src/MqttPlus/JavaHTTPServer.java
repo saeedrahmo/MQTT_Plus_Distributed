@@ -251,16 +251,10 @@ public class JavaHTTPServer implements Runnable{
 
             body = body.replace("\\","\\\\");
             JSONObject obj = new JSONObject(body);
-            String timestamp = new String();
-            if(action.equals(PUBLISH)){
-                Publish publish = Publish.parsePublish(obj);
-                String payloadString = publish.getPayload().toString();
-                String timestampWithQuotes = payloadString.split("timestamp: ")[1];
-                timestamp = timestampWithQuotes.substring(1, 16);
-
-            }
 
             System.out.println(body);
+
+            String timestamp = new String();
 
             if(action.equals(SUBSCRIPTION)){
                 if(SubscriptionHandler.getInstance().isForwarded(obj) && distributedProtocol){
@@ -289,6 +283,12 @@ public class JavaHTTPServer implements Runnable{
             else if(action.equals(PUBLISH)){
                 writeResponse(new JSONObject());
                 PublishHandler.getInstance().handlePublish(obj);
+
+                Publish publish = Publish.parsePublish(obj);
+                String payloadString = publish.getPayload().toString();
+                String timestampWithQuotes = payloadString.split("timestamp: ")[1];
+                timestamp = timestampWithQuotes.substring(1, 16);
+                computeDuration(timestamp);
             }
             else if(action.equals(UNSUBSCRIPTION)){
                 UnsubcriptionHandler.getInstance().handleUnsubscription(obj);
@@ -302,7 +302,6 @@ public class JavaHTTPServer implements Runnable{
                 UnsubcriptionHandler.getInstance().handleDisconnect(obj);
             }
             System.out.println("PRIMA DI computeDuration");
-            computeDuration(timestamp);
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -348,7 +347,7 @@ public class JavaHTTPServer implements Runnable{
         state = newState;
     }
 
-    public static void computeDuration(String startingTimeStamp){
+    public void computeDuration(String startingTimeStamp){
         System.out.println("Dentro computeDuration");
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
         try {

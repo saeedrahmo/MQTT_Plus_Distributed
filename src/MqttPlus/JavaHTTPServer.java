@@ -349,6 +349,7 @@ public class JavaHTTPServer implements Runnable{
 
     public static void computeDuration(String startingTimeStamp){
         if(!startingTimeStamp.equals("")) {
+            System.out.println("Delay Computation");
             SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
             try {
                 Date d1 = format.parse(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));

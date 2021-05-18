@@ -301,6 +301,7 @@ public class JavaHTTPServer implements Runnable{
                 writeResponse(new JSONObject());
                 UnsubcriptionHandler.getInstance().handleDisconnect(obj);
             }
+            System.out.println("PRIMA DI computeDuration");
             computeDuration(timestamp);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -348,19 +349,17 @@ public class JavaHTTPServer implements Runnable{
     }
 
     public static void computeDuration(String startingTimeStamp){
-        if(!startingTimeStamp.equals("")) {
-            System.out.println("Delay Computation");
-            SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
-            try {
-                Date d1 = format.parse(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));
-                Date d2 = format.parse(startingTimeStamp);
-                long diff = d1.getTime() - d2.getTime();
-                long diffSeconds = diff / 1000 % 60;
+        System.out.println("Dentro computeDuration");
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
+        try {
+            Date d1 = format.parse(Instant.now().toString().split("T")[1].split("Z")[0].substring(0, 15));
+            Date d2 = format.parse(startingTimeStamp);
+            long diff = d1.getTime() - d2.getTime();
+            long diffSeconds = diff / 1000 % 60;
 
-                System.out.println("Packet processing time:" + diffSeconds);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            System.out.println("Packet processing time:" + diffSeconds);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
 

@@ -359,7 +359,8 @@ public class JavaHTTPServer implements Runnable{
 
             System.out.println("Packet processing time:" + diffSeconds);
         } catch (ParseException e) {
-            e.printStackTrace();
+            if (startingTimeStamp.equals(""))
+                return;
         }
     }
 

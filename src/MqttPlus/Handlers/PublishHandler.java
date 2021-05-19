@@ -77,10 +77,13 @@ public class PublishHandler {
                 PRT.getInstance().forwardPublish(publish);
             }
         }
-        System.out.println("PROVA COMPUTEDURATION");
+        System.out.println("PROVA COMPUTEDURATION " + publish.getPayload().toString());
         String payloadString = publish.getPayload().toString();
+        System.out.println("Prova2");
         String timestampWithQuotes = payloadString.split("timestamp: ")[1];
+        System.out.println("Prova3");
         String timestamp = timestampWithQuotes.substring(1, 16);
+        System.out.println("Prova4");
         computeDuration(timestamp);
 
         DataType inputDT = getInputDT(publish.getPayload());

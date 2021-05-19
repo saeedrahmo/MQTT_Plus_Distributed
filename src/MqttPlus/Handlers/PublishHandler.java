@@ -77,7 +77,7 @@ public class PublishHandler {
                 PRT.getInstance().forwardPublish(publish);
             }
         }
-        System.out.println("PROVA COMPUTEDURATION");
+        System.out.println("PROVA COMPUTEDURATION: " + publish.getPayload().toString().split("timestamp: ")[1].substring(1, 16));
         computeDuration(publish.getPayload().toString().split("timestamp: ")[1].substring(1, 16));
         System.out.println("TEST USCITA");
 

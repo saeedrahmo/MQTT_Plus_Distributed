@@ -77,14 +77,9 @@ public class PublishHandler {
                 PRT.getInstance().forwardPublish(publish);
             }
         }
-        System.out.println("PROVA COMPUTEDURATION " + publish.getPayload().toString());
-        String payloadString = publish.getPayload().toString();
-        System.out.println("Prova2");
-        String timestampWithQuotes = payloadString.split("timestamp: ")[1];
-        System.out.println("Prova3");
-        String timestamp = timestampWithQuotes.substring(1, 16);
-        System.out.println("Prova4");
-        computeDuration(timestamp);
+        System.out.println("PROVA COMPUTEDURATION");
+        computeDuration(publish.getPayload().toString().split("timestamp: ")[1].substring(1, 16));
+        System.out.println("TEST USCITA");
 
         DataType inputDT = getInputDT(publish.getPayload());
 

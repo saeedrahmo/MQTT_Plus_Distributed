@@ -196,7 +196,7 @@ public class JavaHTTPServer implements Runnable{
 
     @Override
     public void run() {
-
+        long startTime = System.currentTimeMillis();
         //continue to create thread to handle the clients request but block them until discovery is completed
         if(distributedProtocol) {
             synchronized (this.discoveryHandler) {
@@ -306,6 +306,8 @@ public class JavaHTTPServer implements Runnable{
                 e.printStackTrace();
             }
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("The duration is: " + (endTime-startTime));
 
     }
 

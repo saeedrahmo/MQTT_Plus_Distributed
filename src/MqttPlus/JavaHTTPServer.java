@@ -35,7 +35,6 @@ import org.json.simple.parser.JSONParser;
 
 public class JavaHTTPServer implements Runnable{
 
-
     private final String CONTENT_LENGTH = "content-length: ";
     private final String EMPTY_STRING = "";
     private final String MOSQUITTO = "mosquitto: ";
@@ -47,7 +46,6 @@ public class JavaHTTPServer implements Runnable{
     private static ServerState state = ServerState.valueOf("DISCOVERY");
     private final DiscoveryHandler discoveryHandler;
     private final JSONUtility jsonUtility; //to be removed
-
 
     public static boolean local;
     public static boolean distributedProtocol = true;
@@ -73,14 +71,18 @@ public class JavaHTTPServer implements Runnable{
     public static void main(String[] args) {
         try {
 
+            // the number of the port used by the Server to communicate with the broker
             PORT = Integer.parseInt(args[0]);
+            // the number of the port the broker is using to communicate thorugh the MQTT protocol
             String brokerPort = args[1];
+            // a flag that enable or disable the distributed mode for the Java Server
             distributedProtocol = new Boolean(args[2]);
 
             try{
 
                 topology = new String(args[3]);
                 numberOfBrokers = Integer.valueOf(args[4]);
+                // ?
                 local = new Boolean(args[5]);
 
             }catch(IndexOutOfBoundsException ex){
@@ -88,7 +90,6 @@ public class JavaHTTPServer implements Runnable{
             }
             MQTTPublish.setBrokerPort(brokerPort);
             if(distributedProtocol){
-
                 //hardcodeORT();
                 new Thread(DiscoveryHandler.getInstance()).start();
                 //new Thread(JSONUtility.getInstance(topology, numberOfBrokers)).start();
@@ -115,6 +116,7 @@ public class JavaHTTPServer implements Runnable{
             ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(200);
             while (true) {
 
+                // thread and runnable ?
                 // create dedicated thread to manage the client connection
                 Runnable myServer = new JavaHTTPServer(serverConnect.accept(), JSONUtility.getInstance(topology, numberOfBrokers));
                 executor.submit(myServer);
@@ -212,6 +214,7 @@ public class JavaHTTPServer implements Runnable{
 
             System.out.println(JavaHTTPServer.getState());
         }
+        // end of discovery
 
         BufferedReader in=null;
         String line;

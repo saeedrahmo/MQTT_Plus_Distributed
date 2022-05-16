@@ -92,7 +92,6 @@ public class DiscoveryHandler implements Runnable{
     public synchronized void insertDiscoveredSTPAddress(String proxy, String stpAddress){
         STPAddressMap.put(proxy, stpAddress);
         System.out.println("STPAddressMap Map: " + STPAddressMap);
-
     }
 
     public synchronized Set<String> getProxies(){

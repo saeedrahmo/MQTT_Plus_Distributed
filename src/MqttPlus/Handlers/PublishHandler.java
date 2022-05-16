@@ -31,24 +31,22 @@ public class PublishHandler {
 
     private static PublishHandler instance;
 
-    private PublishHandler(){
+    private PublishHandler() {
     }
 
-    public static PublishHandler getInstance(){
-        if(instance==null){
+    public static PublishHandler getInstance() {
+        if (instance == null) {
             instance = new PublishHandler();
         }
         return instance;
     }
 
-
-    public JSONObject handlePublish(JSONObject obj){
+    public JSONObject handlePublish(JSONObject obj) {
         SubscriptionBuffer subscriptionBuffer = SubscriptionBuffer.getInstance();
 
         Publish publish = Publish.parsePublish(obj);
 
-
-        if(JavaHTTPServer.distributedProtocol) {
+        if (JavaHTTPServer.distributedProtocol) {
             if (publish.getTopic().contains("@")) {
                 String hostname = publish.getTopic().split("@")[1];
                 String cleanTopic = publish.getTopic().split("@")[0];
@@ -60,11 +58,11 @@ public class PublishHandler {
                 AdvertisementHandling.forward(cleanTopic, publish.getPayload(), JavaHTTPServer.local, hostname);
                 publish.setTopic(cleanTopic);
 
-                    if (!SRT.getInstance().isSubAdvSent(cleanTopic, hostname)) {
-                        for (String sub : SRT.getInstance().findSubAdv(cleanTopic, hostname)) {
-                            SRT.getInstance().recordSubscriptionAdvSent(sub, hostname);
-                            SubscriptionHandler.getInstance().sendSubscription(sub, hostname);
-                        }
+                if (!SRT.getInstance().isSubAdvSent(cleanTopic, hostname)) {
+                    for (String sub : SRT.getInstance().findSubAdv(cleanTopic, hostname)) {
+                        SRT.getInstance().recordSubscriptionAdvSent(sub, hostname);
+                        SubscriptionHandler.getInstance().sendSubscription(sub, hostname);
+                    }
                 }
 
             } else if (!AdvertisementHandling.isAlreadyPublished(publish.getTopic()) && !PRT.getInstance().findTopic(publish.getTopic()) && !publish.getClientId().contains("PRT")) {
@@ -85,82 +83,80 @@ public class PublishHandler {
 
         PublishBuffer publishBuffer = null;
 
-        if(inputDT==DataType.NUMERIC){
+        if (inputDT == DataType.NUMERIC) {
             publishBuffer = NumericBuffer.getInstance();
-            publishBuffer.insertLastValue(publish.getTopic(),new Double(publish.getPayload().toString()));
-            publishBuffer.insertTemporalValue(publish.getTopic(),new Double(publish.getPayload().toString()));
+            publishBuffer.insertLastValue(publish.getTopic(), new Double(publish.getPayload().toString()));
+            publishBuffer.insertTemporalValue(publish.getTopic(), new Double(publish.getPayload().toString()));
             System.out.println(publishBuffer.temporalValueBufferToString());
-        }
-        else if(inputDT == DataType.IMAGEBUFFER){
+        } else if (inputDT == DataType.IMAGEBUFFER) {
             ImageAnalyzer imageAnalyzer = null;
-            if(subscriptionBuffer.existMatchingSubscription(publish.getTopic(), InformationExtractionOperatorEnum.COUNTPEOPLE)){
+            if (subscriptionBuffer.existMatchingSubscription(publish.getTopic(), InformationExtractionOperatorEnum.COUNTPEOPLE)) {
                 publishBuffer = CountPeopleBuffer.getInstance();
                 int peopleCount;
                 try {
-                    if(imageAnalyzer == null){
-                        imageAnalyzer = new ImageAnalyzer((String)publish.getPayload());
+                    if (imageAnalyzer == null) {
+                        imageAnalyzer = new ImageAnalyzer((String) publish.getPayload());
                     }
-                    peopleCount = imageAnalyzer.countPeople((String)publish.getPayload());
-                    publishBuffer.insertLastValue(publish.getTopic(),new Double(peopleCount));
-                    publishBuffer.insertTemporalValue(publish.getTopic(),new Double((peopleCount)));
+                    peopleCount = imageAnalyzer.countPeople((String) publish.getPayload());
+                    publishBuffer.insertLastValue(publish.getTopic(), new Double(peopleCount));
+                    publishBuffer.insertTemporalValue(publish.getTopic(), new Double((peopleCount)));
                 } catch (ImageAnalyzerException e) {
                     e.printStackTrace();
-                    MQTTPublish.sendPublish(publish.getTopic(),e.getMessage());
+                    MQTTPublish.sendPublish(publish.getTopic(), e.getMessage());
                 }
             }
-            if(subscriptionBuffer.existMatchingSubscription(publish.getTopic(), InformationExtractionOperatorEnum.COUNTMALE)){
+            if (subscriptionBuffer.existMatchingSubscription(publish.getTopic(), InformationExtractionOperatorEnum.COUNTMALE)) {
                 publishBuffer = CountMaleBuffer.getInstance();
                 int maleCount;
                 try {
-                    if(imageAnalyzer == null){
-                        imageAnalyzer = new ImageAnalyzer((String)publish.getPayload());
+                    if (imageAnalyzer == null) {
+                        imageAnalyzer = new ImageAnalyzer((String) publish.getPayload());
                     }
                     maleCount = imageAnalyzer.countMale((String) publish.getPayload());
-                    publishBuffer.insertLastValue(publish.getTopic(),new Double(maleCount));
-                    publishBuffer.insertTemporalValue(publish.getTopic(),new Double((maleCount)));
+                    publishBuffer.insertLastValue(publish.getTopic(), new Double(maleCount));
+                    publishBuffer.insertTemporalValue(publish.getTopic(), new Double((maleCount)));
                 } catch (ImageAnalyzerException e) {
                     e.printStackTrace();
-                    MQTTPublish.sendPublish(publish.getTopic(),e.getMessage());
+                    MQTTPublish.sendPublish(publish.getTopic(), e.getMessage());
                 }
             }
-            if((subscriptionBuffer.existMatchingSubscription(publish.getTopic(), InformationExtractionOperatorEnum.COUNTFEMALE))){
+            if ((subscriptionBuffer.existMatchingSubscription(publish.getTopic(), InformationExtractionOperatorEnum.COUNTFEMALE))) {
                 publishBuffer = CountFemaleBuffer.getInstance();
                 int femaleCount;
                 try {
-                    if(imageAnalyzer == null){
-                        imageAnalyzer = new ImageAnalyzer((String)publish.getPayload());
+                    if (imageAnalyzer == null) {
+                        imageAnalyzer = new ImageAnalyzer((String) publish.getPayload());
                     }
-                    femaleCount = imageAnalyzer.countFemale((String)publish.getPayload());
-                    publishBuffer.insertLastValue(publish.getTopic(),new Double(femaleCount));
-                    publishBuffer.insertTemporalValue(publish.getTopic(),new Double((femaleCount)));
+                    femaleCount = imageAnalyzer.countFemale((String) publish.getPayload());
+                    publishBuffer.insertLastValue(publish.getTopic(), new Double(femaleCount));
+                    publishBuffer.insertTemporalValue(publish.getTopic(), new Double((femaleCount)));
                 } catch (ImageAnalyzerException e) {
                     e.printStackTrace();
-                    MQTTPublish.sendPublish(publish.getTopic(),e.getMessage());
+                    MQTTPublish.sendPublish(publish.getTopic(), e.getMessage());
                 }
 
             }
         }
 
-        HashMap<String,Object> hashMap = PublishVirtualizer.rewrittenPublishes(publish,publishBuffer);
-        for(String key : hashMap.keySet()){
-            MQTTPublish.sendPublish(key,hashMap.get(key));
+        HashMap<String, Object> hashMap = PublishVirtualizer.rewrittenPublishes(publish, publishBuffer);
+        for (String key : hashMap.keySet()) {
+            MQTTPublish.sendPublish(key, hashMap.get(key));
         }
 
         return new JSONObject(hashMap);
 
     }
 
-    public DataType getInputDT(Object objPayload){
+    public DataType getInputDT(Object objPayload) {
 
         try {
             new Double(objPayload.toString());
             return DataType.NUMERIC;
-        }
-        catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             try {
 
 
-                String imageString =((String)objPayload);
+                String imageString = ((String) objPayload);
                 // create a buffered image
                 BufferedImage image = null;
                 byte[] imageByte;
@@ -170,16 +166,14 @@ public class PublishHandler {
                 image = ImageIO.read(bis);
                 bis.close();
 
-                if(image!=null) {
+                if (image != null) {
                     File outputFile = new File(ImageAnalyzer.path + "image.jpeg");
-                    ImageIO.write(image,"jpeg",outputFile);
+                    ImageIO.write(image, "jpeg", outputFile);
                     return DataType.IMAGEBUFFER;
                 }
-            }
-            catch (IOException e1) {
+            } catch (IOException e1) {
 
-            }
-            catch (ClassCastException e1){
+            } catch (ClassCastException e1) {
 
             }
         }
@@ -188,7 +182,7 @@ public class PublishHandler {
 
     }
 
-    private void computeDuration(String startingTimeStamp){
+    private void computeDuration(String startingTimeStamp) {
         System.out.println("Dentro computeDuration");
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSSSS");
         try {
@@ -203,9 +197,6 @@ public class PublishHandler {
                 return;
         }
     }
-
-
-
 
 
 }
